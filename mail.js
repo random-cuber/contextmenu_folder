@@ -714,7 +714,7 @@ if (window.rcmail) {
 				style : 'display: none; visibility: hidden;',
 			});
 
-			menu_source = [ menu_id ];
+			var menu_source = [ menu_id ];
 
 			menu_source.push({
 				label : localization('show_all'),

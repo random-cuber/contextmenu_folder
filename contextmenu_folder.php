@@ -1,8 +1,11 @@
 <?php
 
+// Plugin: contextmenu_folder
+// Roundcube Context Menu Folder Manager
+// Adds context menus with mailbox operations
 class contextmenu_folder extends rcube_plugin {
 
-    private static $filter_type_list = array('special', 'unread', 'selected', 'transient', 'predefined');
+    private static $filter_type_list = array('unread', 'special', 'selected', 'transient', 'predefined');
 
     const ROOT = ''; // root of mail box hierarchy
 
