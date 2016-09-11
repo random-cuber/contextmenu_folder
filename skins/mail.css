@@ -59,7 +59,7 @@ div.contextmenu.rcmmainmenu ul.iconized li a.folder_rename span.icon:before {
     content: "✎";
 }
 
-div.contextmenu.rcmmainmenu ul.iconized li a.folder_tree_mark_read span.icon:before {
+div.contextmenu.rcmmainmenu ul.iconized li a.folder_tree_read span.icon:before {
     content: "✔";
 }
 

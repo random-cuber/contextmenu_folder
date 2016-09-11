@@ -9,9 +9,9 @@ class contextmenu_folder extends rcube_plugin {
 
     const ROOT = ''; // root of mail box hierarchy
 
-    const COLLECT_SELECTED = 'collect_selected'; // config key for selected folders
-    const COLLECT_TRANSIENT = 'collect_transient'; // config key for transient folders
-    const COLLECT_PREDEFINED = 'collect_predefined'; // config key for predefined folders
+    const COLLECT_SELECTED = 'collect_selected'; // config key for 'selected' folder collection
+    const COLLECT_TRANSIENT = 'collect_transient'; // config key for 'transient' folder collection
+    const COLLECT_PREDEFINED = 'collect_predefined'; // config key for 'predefined' folder collection
 
     public $task = 'mail|settings'; // supported tasks regex filter
 
@@ -112,14 +112,15 @@ class contextmenu_folder extends rcube_plugin {
     // mail
     function init_mail_action() {
         $this->register_action($this->key('show_mode'), array($this, 'action_show_mode'));
-        $this->register_action($this->key('show_folder'), array($this, 'action_show_folder'));
         $this->register_action($this->key('collect_list'), array($this, 'action_collect_list'));
+        $this->register_action($this->key('header_list'), array($this, 'action_header_list'));
         $this->register_action($this->key('folder_list'), array($this, 'action_folder_list'));
         $this->register_action($this->key('folder_create'), array($this, 'action_folder_create'));
         $this->register_action($this->key('folder_delete'), array($this, 'action_folder_delete'));
+        $this->register_action($this->key('folder_locate'), array($this, 'action_folder_locate'));
         $this->register_action($this->key('folder_rename'), array($this, 'action_folder_rename'));
-        $this->register_action($this->key('folder_mark_read'), array($this, 'action_folder_mark_read'));
         $this->register_action($this->key('folder_select'), array($this, 'action_folder_select'));
+        $this->register_action($this->key('folder_tree_read'), array($this, 'action_folder_tree_read'));
     }
 
     // mail
@@ -134,9 +135,9 @@ class contextmenu_folder extends rcube_plugin {
             $output->set_env($this->key('show_mode'), $this->config_get('show_mode'));
             $output->set_env($this->key('enable_logging'), $this->config_get('enable_logging'));
             $output->set_env($this->key('enable_refresh'), $this->config_get('enable_refresh'));
-            $output->set_env($this->key('enable_folder_context_menu'), $this->config_get('enable_folder_context_menu'));
-            $output->set_env($this->key('enable_folder_control_menu'), $this->config_get('enable_folder_control_menu'));
-            $output->set_env($this->key('enable_message_list_menu'), $this->config_get('enable_message_list_menu'));
+            $output->set_env($this->key('enable_folder_list_context_menu'), $this->config_get('enable_folder_list_context_menu'));
+            $output->set_env($this->key('enable_folder_list_control_menu'), $this->config_get('enable_folder_list_control_menu'));
+            $output->set_env($this->key('enable_message_list_context_menu'), $this->config_get('enable_message_list_context_menu'));
             $output->set_env($this->key('special_folder_list'), $this->special_folder_list());
         }
     }
@@ -304,6 +305,7 @@ class contextmenu_folder extends rcube_plugin {
         if($this->config_get('enable_refresh')) {
             $this->log('TODO ');
         }
+        $this->action_folder_list();
         return $args;
     }
     
@@ -455,7 +457,7 @@ class contextmenu_folder extends rcube_plugin {
     }
 
     // switch ui to provided mail box 
-    public function action_show_folder() {
+    public function action_folder_locate() {
         $target = $this->input_value('target');
         $this->folder_transient_set($target);
         $this->select_folder($target);
@@ -489,7 +491,7 @@ class contextmenu_folder extends rcube_plugin {
     }
 
     // recursively navigate mail box and its descendats and mark all as read
-    public function action_folder_mark_read() {
+    public function action_folder_tree_read() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;
         
@@ -508,6 +510,38 @@ class contextmenu_folder extends rcube_plugin {
         }
         
         $output->send();
+    }
+    
+    // structured message address headers
+    public function action_header_list(){
+        $uid = $this->input_value('uid');
+        $mbox = $this->input_value('mbox');
+        $message = new rcube_message($uid, $mbox);
+        $header_list = array();
+        foreach(array('from', 'to', 'cc') as $type) {
+            $header = $message->get_header($type);
+            $address_list = rcube_mime::decode_address_list($header);
+            foreach($address_list as $address) {
+                $name = $address['name'];
+                if (strpos($name, ",") === false) {
+                    $full_part = explode(" ", $name);
+                } else { // inverse names order
+                    $temp = explode(",", $name);
+                    $full_part = array(end($temp), reset($temp));
+                }
+                $full = implode(" ", $full_part);
+                $mailto = strtolower($address['mailto']); $mailto_part = explode("@", $mailto);
+                $header_list[] = array(
+                    'type' => $type, 'name' => $name, 'string' => $address['string'],
+                    'full' => $full, 'head' => reset($full_part), 'tail' => end($full_part),
+                    'mailto' => $mailto, 'prefix' => reset($mailto_part), 'domain' => end($mailto_part),
+                );
+            }
+        }
+        $this->log(print_r($header_list, true));
+        $output = $this->rc->output;
+        $output->command($this->key('header_list'), array('header_list' => $header_list));
+        $output->send('plugin');
     }
     
     ////////////////////////////
