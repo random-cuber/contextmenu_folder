@@ -1,0 +1,28 @@
+{
+	"name": "random-cuber/contextmenu_folder",
+	"description": "Adds context menus with folder tasks",
+	"keywords": ["context", "menu", "folder", "task", "create", "delete", "rename", "locate", "filter", "view"],
+	"homepage": "https://github.com/random-cuber/contextmenu_folder",
+	"license": "Apache",
+	"type": "roundcube-plugin",
+	"version": "1.2.18",
+	"authors": [{
+		"name": "Andrei Pozolotin",
+		"email": "andrei.pozolotin@gmail.com",
+		"role": "Developer"
+	}],
+	"repositories": [{
+		"type": "composer",
+		"url": "http://plugins.roundcube.net"
+	}],
+	"require": {
+		"php": ">=5.3.0",
+		"roundcube/plugin-installer": ">=0.1.2",
+		"johndoh/contextmenu": ">=2"
+	},
+	"extra": {
+		"roundcube": {
+			"min-version": "1.2"
+		}
+	}
+}

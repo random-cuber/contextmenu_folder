@@ -1,0 +1,36 @@
+
+/* classic: button */
+
+#mailboxmenulink {
+    vertical-align: top;
+}
+
+#contextmenu_folder_status {
+    vertical-align: top;
+    background-image: none;
+    border-right-color: grey;
+    border-right-style: solid;
+    border-right-width: 1px;
+}
+
+#contextmenu_folder_status span {
+    opacity: 0.6;
+    font-size: 1.1em;
+    text-indent: 0;
+    text-align: center;
+    display: block;
+    padding: 4px 0px 0px 0px;
+}
+
+/* classic: menu */
+
+div.contextmenu.rcmmainmenu ul.iconized li a.override span.icon {
+    background-image: none;
+    padding-left: 10px;
+}
+
+div.contextmenu.rcmmainmenu ul.iconized li a.override span.icon:before {
+    opacity: 0.8;
+    font-size: 1.1em;
+    padding-right: 8px;
+}
