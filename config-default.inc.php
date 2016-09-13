@@ -60,6 +60,7 @@ $config['plugin.contextmenu_folder.predefined_list'] = array(
 // expose these settings in user ui
 $config['plugin.contextmenu_folder.settings_area_list'] = array(
         'predefined_list',
+        'contact_folder_format_list',
 );
 
 // expiration time for auto reset of transient mail box collection, minutes
@@ -72,5 +73,45 @@ $config['plugin.contextmenu_folder.settings_text_list'] = array(
 
 // determine how to obtain list of imap special folders
 $config['plugin.contextmenu_folder.special_folder_source'] = 'config'; // config|storage
+
+// last selected list entry 
+$config['plugin.contextmenu_folder.contact_folder_parent_item'] = '0';
+$config['plugin.contextmenu_folder.contact_folder_header_item'] = '0';
+$config['plugin.contextmenu_folder.contact_folder_format_item'] = '0';
+
+// rules for making contact folder derived from mail headers
+$config['plugin.contextmenu_folder.contact_folder_format_list'] = array(
+        
+        '{parent}/{full_name} @{domain}',
+        '{parent}/{full_name} {mail_addr}',
+        
+        '{parent}/{full_name} [{subject}] @{domain}',
+        '{parent}/{full_name} [{subject}] {mail_addr}',
+        
+        '{parent}/{company} @{domain}',
+        '{parent}/{company} {mail_addr}',
+
+        '{parent}/{company} [{subject}] @{domain}',
+        '{parent}/{company} [{subject}] {mail_addr}',
+
+        '{parent}/{company}/{full_name} @{domain}',
+        '{parent}/{company}/{full_name} {mail_addr}',
+        
+        '{parent}/{company}/{full_name} [{subject}] @{domain}',
+        '{parent}/{company}/{full_name} [{subject}] {mail_addr}',
+        
+        '{parent}/{company}/{company} @{domain}',
+        '{parent}/{company}/{company} {mail_addr}',
+        
+        '{parent}/{company}/{company} [{subject}] @{domain}',
+        '{parent}/{company}/{company} [{subject}] {mail_addr}',
+        
+        '{parent}/{company}/{company} {full_name} @{domain}',
+        '{parent}/{company}/{company} {full_name} {mail_addr}',
+        
+        '{parent}/{company}/{company} {full_name} [{subject}] @{domain}',
+        '{parent}/{company}/{company} {full_name} [{subject}] {mail_addr}',
+        
+);
 
 ?>

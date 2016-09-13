@@ -44,6 +44,13 @@ $labels['delete'] = 'Delete';
 $labels['rename'] = 'Rename';
 $labels['locate'] = 'Locate';
 
+$labels['parent'] = 'Parent';
+$labels['header'] = 'Header';
+$labels['format'] = 'Format';
+$labels['type'] = 'Type';
+$labels['full_name'] = 'Full Name';
+$labels['mail_addr'] = 'Mailing Address';
+
 // settings
 
 $labels['folder_menu'] = 'Folder Menu';
@@ -58,5 +65,6 @@ $labels['filter_active'] = 'Filters in category "active"';
 $labels['filter_favorite'] = 'Filters in category "favorite"';
 
 $labels['predefined_list'] = 'Folders in "predefined" filter';
+$labels['contact_folder_format_list'] = 'Contact folder format rules';
 
 ?>

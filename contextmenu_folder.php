@@ -138,6 +138,10 @@ class contextmenu_folder extends rcube_plugin {
             $output->set_env($this->key('enable_folder_list_context_menu'), $this->config_get('enable_folder_list_context_menu'));
             $output->set_env($this->key('enable_folder_list_control_menu'), $this->config_get('enable_folder_list_control_menu'));
             $output->set_env($this->key('enable_message_list_context_menu'), $this->config_get('enable_message_list_context_menu'));
+            $output->set_env($this->key('contact_folder_parent_item'), $this->config_get('contact_folder_parent_item'));
+            $output->set_env($this->key('contact_folder_header_item'), $this->config_get('contact_folder_header_item'));
+            $output->set_env($this->key('contact_folder_format_item'), $this->config_get('contact_folder_format_item'));
+            $output->set_env($this->key('contact_folder_format_list'), $this->config_get('contact_folder_format_list'));
             $output->set_env($this->key('special_folder_list'), $this->special_folder_list());
         }
     }
@@ -404,6 +408,19 @@ class contextmenu_folder extends rcube_plugin {
             return;
         }
     }
+    
+    // create complete folder tree, bottom up
+    function folder_ensure_tree($target) {
+        $storage = $this->rc->storage;
+        if($storage->folder_exists($target)) {
+            return true;
+        }
+        $parent = $this->parent_mbox($target);
+        if($parent == self::ROOT || $storage->folder_exists($parent)) {
+            return $storage->create_folder($target, true);
+        }
+        return $this->folder_ensure_tree($parent) && $storage->create_folder($target, true); // recurse
+    }
 
     // create imap mail box and switch ui to result
     public function action_folder_create() {
@@ -411,7 +428,7 @@ class contextmenu_folder extends rcube_plugin {
         $storage = $this->rc->storage;
           
         $target = $this->input_value('target');
-        $result = $storage->create_folder($target, true);
+        $result = $this->folder_ensure_tree($target);
         if ($result) {
             $this->folder_transient_set($target);
             $this->select_folder($target);
@@ -511,7 +528,7 @@ class contextmenu_folder extends rcube_plugin {
         
         $output->send();
     }
-    
+
     // structured message address headers
     public function action_header_list(){
         $uid = $this->input_value('uid');
@@ -520,21 +537,26 @@ class contextmenu_folder extends rcube_plugin {
         $header_list = array();
         foreach(array('from', 'to', 'cc') as $type) {
             $header = $message->get_header($type);
+            $subject = $message->get_header('subject');
             $address_list = rcube_mime::decode_address_list($header);
             foreach($address_list as $address) {
-                $name = $address['name'];
+                $name = trim($address['name']);
                 if (strpos($name, ",") === false) {
                     $full_part = explode(" ", $name);
                 } else { // inverse names order
                     $temp = explode(",", $name);
-                    $full_part = array(end($temp), reset($temp));
+                    $full_part = array(trim(end($temp)), trim(reset($temp)));
                 }
-                $full = implode(" ", $full_part);
+                $full = implode(" ", $full_part); $full = ucwords($full);
                 $mailto = strtolower($address['mailto']); $mailto_part = explode("@", $mailto);
+                $prefix = reset($mailto_part); $domain = end($mailto_part);
+                $company = explode(".", $domain); array_pop($company); 
+                $company = array_pop($company); $company = ucwords($company); 
                 $header_list[] = array(
                     'type' => $type, 'name' => $name, 'string' => $address['string'],
-                    'full' => $full, 'head' => reset($full_part), 'tail' => end($full_part),
-                    'mailto' => $mailto, 'prefix' => reset($mailto_part), 'domain' => end($mailto_part),
+                    'full_name' => $full, 'full_head' => reset($full_part), 'full_tail' => end($full_part),
+                    'mail_addr' => $mailto, 'prefix' => $prefix, 'domain' => $domain, 'company' => $company,
+                    'subject' => $subject,
                 );
             }
         }
@@ -612,7 +634,7 @@ class contextmenu_folder extends rcube_plugin {
     function build_textarea(& $entry, $name) {
         $key = $this->key($name);
         $textarea = new html_textarea(array(
-             'id' => $key, 'name' => $key, 'rows' => 5,
+             'id' => $key, 'name' => $key, 'rows' => 5, 'cols' => 65,
         ));
         $entry['options'][$name] = array(
             'title' => html::label($key, $this->quoted($name)),
@@ -658,7 +680,7 @@ class contextmenu_folder extends rcube_plugin {
         $value = explode(PHP_EOL, $value); // array from text
         $value = array_map('trim', $value); // no spaces
         $value = array_filter($value); // no empty lines
-        sort($value); // alpha sorted
+        // sort($value); // alpha sorted
         $prefs[$key] = $value;
     }
   

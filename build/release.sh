@@ -28,7 +28,7 @@ version_build() {
 }
 
 version_increment() {
-    version_micro=$(( $version_micro +1 ))
+    version_micro=$(( $version_micro + 1 ))
 }
 
 version_update() {
