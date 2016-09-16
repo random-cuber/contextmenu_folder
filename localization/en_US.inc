@@ -51,6 +51,9 @@ $labels['type'] = 'Type';
 $labels['full_name'] = 'Full Name';
 $labels['mail_addr'] = 'Mailing Address';
 
+$labels['message_copy'] = 'Copy to folder';
+$labels['message_move'] = 'Move to folder';
+
 // settings
 
 $labels['folder_menu'] = 'Folder Menu';

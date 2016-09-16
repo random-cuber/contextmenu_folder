@@ -14,10 +14,17 @@ class contextmenu_folder extends rcube_plugin {
     const COLLECT_PREDEFINED = 'collect_predefined'; // config key for 'predefined' folder collection
 
     public $task = 'mail|settings'; // supported tasks regex filter
+    public $allowed_prefs = array(); // see: rcube_plugin->$allowed_prefs
 
-    private $rc; // controller singleton
     private $config_default = array(); // default plugin configuration
+    private $rc; // controller singleton
 
+    // early instace init
+    function onload() {
+        $this->provide_allowed_prefs();
+    }
+
+    // final instace init
     function init() {
         $this->require_plugin('jqueryui');
         $this->require_plugin('contextmenu');
@@ -82,7 +89,7 @@ class contextmenu_folder extends rcube_plugin {
     }
     
     // load plugin default configuration file
-    function provide_config_default($name = 'config-default.inc.php') {
+    function provide_config_default($name = 'default.inc.php') {
         $config = null;
         $path = $this->home . '/' . $name;
         if ($path && is_file($path) && is_readable($path)) {
@@ -96,6 +103,15 @@ class contextmenu_folder extends rcube_plugin {
     }
     
     ////////////////////////////
+    
+    // allow to save these prefs on demand
+    function provide_allowed_prefs() {
+        $this->allowed_prefs = array(
+            $this->key('contact_folder_parent_item'),
+            $this->key('contact_folder_header_item'),
+            $this->key('contact_folder_format_item'),
+        );
+    }
     
     // match action prefix to plugin name space
     function is_plugin_action($action) {
@@ -128,7 +144,7 @@ class contextmenu_folder extends rcube_plugin {
         $output = $this->rc->output;
         if ($output->type == 'html') {
             $this->add_texts('localization', true);
-            $this->include_script('mail.js');
+            $this->include_script('contextmenu_folder.js');
             $this->include_stylesheet( 'skins' . '/mail.css');
             $this->include_stylesheet($this->local_skin_path() . '/mail.css');
             
@@ -528,6 +544,28 @@ class contextmenu_folder extends rcube_plugin {
         
         $output->send();
     }
+    
+    // guess business name from email domain
+    function company_name($domain) {
+        $generic_list = $this->config_get('domain_generic_list');
+        $country_list = $this->config_get('domain_country_list');
+        $domain = strtolower($domain);
+        $company = explode(".", $domain);
+        if (in_array(end($company), $generic_list)) {
+            array_pop($company); 
+            $company = end($company);
+        } else if (in_array(end($company), $country_list)) {
+            array_pop($company);
+            if(in_array(end($company), $generic_list)) {
+                array_pop($company);
+            }
+            $company = end($company);
+        } else {
+            $company = implode(" ", $company);
+        }
+        $company = ucwords($company);
+        return $company;
+    }
 
     // structured message address headers
     public function action_header_list(){
@@ -543,15 +581,14 @@ class contextmenu_folder extends rcube_plugin {
                 $name = trim($address['name']);
                 if (strpos($name, ",") === false) {
                     $full_part = explode(" ", $name);
-                } else { // inverse names order
+                } else { // reverse names order
                     $temp = explode(",", $name);
                     $full_part = array(trim(end($temp)), trim(reset($temp)));
                 }
-                $full = implode(" ", $full_part); $full = ucwords($full);
+                $full = implode(" ", $full_part); $full = ucwords($full); $full = trim($full);
                 $mailto = strtolower($address['mailto']); $mailto_part = explode("@", $mailto);
                 $prefix = reset($mailto_part); $domain = end($mailto_part);
-                $company = explode(".", $domain); array_pop($company); 
-                $company = array_pop($company); $company = ucwords($company); 
+                $company = $this->company_name($domain);
                 $header_list[] = array(
                     'type' => $type, 'name' => $name, 'string' => $address['string'],
                     'full_name' => $full, 'full_head' => reset($full_part), 'full_tail' => end($full_part),
@@ -580,7 +617,6 @@ class contextmenu_folder extends rcube_plugin {
         $output = $this->rc->output;
         if ($output->type == 'html') {
             $this->add_texts('localization', true);
-            $this->include_script('settings.js');
         }
     }
 

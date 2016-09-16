@@ -2,9 +2,9 @@ Roundcube Context Menu Folder Manager
 =====================================
 Technical plugin name is [contextmenu_folder][contextmenu_folder_link].
 
-Folder list context menu   |  Folder list control menu
-:-------------------------:|:-------------------------:
-![folder_list_context_menu](https://raw.githubusercontent.com/random-cuber/contextmenu_folder/master/build/folder_list_context_menu.png)  |  ![folder_list_control_menu](https://raw.githubusercontent.com/random-cuber/contextmenu_folder/master/build/folder_list_control_menu.png)
+| Folder list context menu      | Folder list control menu      | Message list context menu      |
+|:-----------------------------:|:-----------------------------:|:------------------------------:|
+| ![][folder_list_context_menu] | ![][folder_list_control_menu] | ![][message_list_context_menu] |
 
 This plugin can be useful for users who want to work efficiently with large number
 of mailboxes or imap folders (anywhere form few hundred to few thousand folders).
@@ -113,9 +113,16 @@ Mail -> [Message list] -> [Access context menu]
 ```
 
 Menu entries:
-* `TODO` : TODO
+* `Create folder` : create imap folder based on company/contact name derived from email headers
+* `Copy to folder` : copy selected mailbox messages to a folder located by quick name match
+* `Move to folder` : move selected mailbox messages to a folder located by quick name match
+
 
 [roundcube_arch]: https://wiki.archlinux.org/index.php/Roundcube
 [jqueryui_link]: https://github.com/roundcube/roundcubemail/tree/master/plugins/jqueryui
 [contextmenu_link]: http://plugins.roundcube.net/packages/johndoh/contextmenu
 [contextmenu_folder_link]: http://plugins.roundcube.net/packages/random-cuber/contextmenu_folder
+
+[folder_list_context_menu]:  https://raw.githubusercontent.com/random-cuber/contextmenu_folder/master/build/folder_list_context_menu.png
+[folder_list_control_menu]:  https://raw.githubusercontent.com/random-cuber/contextmenu_folder/master/build/folder_list_control_menu.png
+[message_list_context_menu]: https://raw.githubusercontent.com/random-cuber/contextmenu_folder/master/build/message_list_context_menu.png
