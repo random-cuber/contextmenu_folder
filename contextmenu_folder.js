@@ -52,13 +52,10 @@ function plugin_contextmenu_folder() {
 	}
 
 	// determine folder type
-	this.mbox_type = function(folder) {
-		var folder_list = self.env('special_folder_list');
-		if ($.inArray(folder, folder_list) == -1) {
-			return 'regular';
-		} else {
-			return 'special';
-		}
+	this.mbox_type = function mbox_type(folder) {
+		var folder_list = self.env('special_folder_list') || [];
+		var has_folder = folder_list.indexOf(folder) >= 0;
+		return has_folder ? 'special' : 'regular';
 	}
 
 	// ajax setup
@@ -1370,7 +1367,7 @@ plugin_contextmenu_folder.prototype.mbox_list_context_menu = function mbox_list_
 		classes : 'override folder-icon-folder-read-tree',
 	});
 
-	menu.addEventListener('activate', function(args) {
+	menu.addEventListener('activate', function activate(args) {
 		var source = rcmail.env.context_menu_source_id;
 		var is_regular = self.mbox_type(source) == 'regular';
 		if (args.command == self.key('folder_create')) {

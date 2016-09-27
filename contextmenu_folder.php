@@ -179,7 +179,7 @@ class contextmenu_folder extends rcube_plugin {
         foreach($name_list as $name) {
            $this->set_env($name);
         }
-        $this->set_env($this->key('special_folder_list'), $this->special_folder_list());
+        $this->set_env('special_folder_list', $this->special_folder_list());
     }
 
     // build list of imap special mail box names
