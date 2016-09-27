@@ -18,7 +18,7 @@ $config['plugin.contextmenu_folder.enable_folder_list_context_menu'] = true;
 $config['plugin.contextmenu_folder.enable_folder_list_control_menu'] = true;
 
 // actiate 'create contact folder form email address' feature
-$config['plugin.contextmenu_folder.enable_message_list_context_menu'] = false; // TODO
+$config['plugin.contextmenu_folder.enable_message_list_context_menu'] = true;
 
 // expose these settings in user ui
 $config['plugin.contextmenu_folder.settings_checkbox_list'] = array(
@@ -75,6 +75,9 @@ $config['plugin.contextmenu_folder.settings_text_list'] = array(
 
 // determine how to obtain list of imap special folders
 $config['plugin.contextmenu_folder.special_folder_source'] = 'config'; // config|storage
+
+// last selected show mode
+$config['plugin.contextmenu_folder.show_mode'] = 'show_all';
 
 // last selected list entry 
 $config['plugin.contextmenu_folder.contact_folder_parent_item'] = '0';

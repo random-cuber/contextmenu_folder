@@ -1,15 +1,5 @@
 #!/bin/bash
 
-keys_save() {
-    echo "$FUNCNAME"
-    local url="https://github.com/random-cuber/jquery.hotkeys/archive/master.tar.gz"
-    local package="hotkeys.tar.gz"
-    wget -q "$url" -O "$package"
-    tar x --strip=1 --dir="$keys_dir" --file="$package" \
-        --wildcards '*/jquery.hotkeys.js' '*/README.md'
-    rm -rf "$package"
-}
-
 font_open() {
     echo "$FUNCNAME"
     curl \
@@ -42,13 +32,10 @@ asset_dir="$base_dir/assets"
 font_host="http://fontello.com"
 
 font_dir="$asset_dir/fontello"
-keys_dir="$asset_dir/hotkeys"
 
-mkdir -p "$font_dir" "$keys_dir"
+mkdir -p "$font_dir"
 
 cd "$base_dir"
-
-#keys_save
 
 font_open
 font_save

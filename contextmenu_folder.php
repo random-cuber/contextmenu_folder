@@ -145,22 +145,41 @@ class contextmenu_folder extends rcube_plugin {
         if ($output->type == 'html') {
             $this->add_texts('localization', true);
             $this->include_script('contextmenu_folder.js');
-            $this->include_stylesheet( 'skins' . '/mail.css');
-            $this->include_stylesheet($this->local_skin_path() . '/mail.css');
+            $this->include_stylesheet( 'skins' . '/style.css');
+            $this->include_stylesheet($this->local_skin_path() . '/style.css');
             $this->include_stylesheet( 'assets/fontello/css/folder.css');
 
-            $output->set_env($this->key('show_mode'), $this->config_get('show_mode'));
-            $output->set_env($this->key('enable_logging'), $this->config_get('enable_logging'));
-            $output->set_env($this->key('enable_refresh'), $this->config_get('enable_refresh'));
-            $output->set_env($this->key('enable_folder_list_context_menu'), $this->config_get('enable_folder_list_context_menu'));
-            $output->set_env($this->key('enable_folder_list_control_menu'), $this->config_get('enable_folder_list_control_menu'));
-            $output->set_env($this->key('enable_message_list_context_menu'), $this->config_get('enable_message_list_context_menu'));
-            $output->set_env($this->key('contact_folder_parent_item'), $this->config_get('contact_folder_parent_item'));
-            $output->set_env($this->key('contact_folder_header_item'), $this->config_get('contact_folder_header_item'));
-            $output->set_env($this->key('contact_folder_format_item'), $this->config_get('contact_folder_format_item'));
-            $output->set_env($this->key('contact_folder_format_list'), $this->config_get('contact_folder_format_list'));
-            $output->set_env($this->key('special_folder_list'), $this->special_folder_list());
+            $this->provide_client_env_var();
         }
+    }
+    
+    // client environment variables
+    function set_env($name, $value = null) {
+        $key = $this->key($name);
+        if(! isset($value)) {
+            $value = $this->config_get($name);
+        }
+        $this->rc->output->set_env($key, $value);
+    }
+    
+    // client environment variables
+    function provide_client_env_var() {
+        $name_list = array(
+            'show_mode', 
+            'enable_logging', 
+            'enable_refresh', 
+            'enable_folder_list_context_menu', 
+            'enable_folder_list_control_menu', 
+            'enable_message_list_context_menu', 
+            'contact_folder_parent_item', 
+            'contact_folder_header_item', 
+            'contact_folder_format_item', 
+            'contact_folder_format_list', 
+        );
+        foreach($name_list as $name) {
+           $this->set_env($name);
+        }
+        $this->set_env($this->key('special_folder_list'), $this->special_folder_list());
     }
 
     // build list of imap special mail box names
