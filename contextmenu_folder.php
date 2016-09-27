@@ -147,7 +147,8 @@ class contextmenu_folder extends rcube_plugin {
             $this->include_script('contextmenu_folder.js');
             $this->include_stylesheet( 'skins' . '/mail.css');
             $this->include_stylesheet($this->local_skin_path() . '/mail.css');
-            
+            $this->include_stylesheet( 'assets/fontello/css/folder.css');
+
             $output->set_env($this->key('show_mode'), $this->config_get('show_mode'));
             $output->set_env($this->key('enable_logging'), $this->config_get('enable_logging'));
             $output->set_env($this->key('enable_refresh'), $this->config_get('enable_refresh'));

@@ -5,7 +5,7 @@
     vertical-align: top;
 }
 
-#contextmenu_folder_status {
+#plugin_contextmenu_folder_status {
     vertical-align: top;
     background-image: none;
     border-right-color: grey;
@@ -13,24 +13,37 @@
     border-right-width: 1px;
 }
 
-#contextmenu_folder_status span {
+#plugin_contextmenu_folder_status span {
     opacity: 0.6;
-    font-size: 1.1em;
+    font-size: 1.0em;
     text-indent: 0;
     text-align: center;
     display: block;
-    padding: 4px 0px 0px 0px;
+    padding: 5px 0px 0px 0px;
 }
 
 /* classic: menu */
 
-div.contextmenu.rcmmainmenu ul.iconized li a.override span.icon {
-    background-image: none;
-    padding-left: 10px;
-}
+/* div.contextmenu.rcmmainmenu ul.iconized li a.override span.icon { */
+/*     background-image: none; */
+/*     padding-left: 10px; */
+/* } */
 
-div.contextmenu.rcmmainmenu ul.iconized li a.override span.icon:before {
+/* div.contextmenu.rcmmainmenu ul.iconized li a.override span.icon:before { */
+/*     opacity: 0.8; */
+/*     font-size: 1.1em; */
+/*     padding-right: 8px; */
+/* } */
+
+div.contextmenu.rcmmainmenu ul.iconized li a.override:before {
     opacity: 0.8;
     font-size: 1.1em;
-    padding-right: 8px;
+    padding-left: 0.5em;
+    padding-right: 0.2em;
+}
+
+div.contextmenu.rcmmainmenu ul.iconized li a.override span.icon {
+    background-image: none;
+    display: inline-block;
+    padding-left: 0.2em;
 }

@@ -1,0 +1,184 @@
+{
+  "name": "folder",
+  "css_prefix_text": "folder-icon-",
+  "css_use_suffix": false,
+  "hinting": true,
+  "units_per_em": 1000,
+  "ascent": 850,
+  "glyphs": [
+    {
+      "uid": "1e77a2yvsq3owssduo2lcgsiven57iv5",
+      "css": "folder-rename",
+      "code": 59394,
+      "src": "typicons"
+    },
+    {
+      "uid": "a66e72da83c98248ae3ef43808efc452",
+      "css": "plus-cir",
+      "code": 59397,
+      "src": "websymbols"
+    },
+    {
+      "uid": "994eaa764b3f30721f3839c64c390ce3",
+      "css": "minus-cir",
+      "code": 59398,
+      "src": "websymbols"
+    },
+    {
+      "uid": "861ab06e455e2de3232ebef67d60d708",
+      "css": "minus",
+      "code": 59399,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "44e04715aecbca7f266a17d5a7863c68",
+      "css": "plus",
+      "code": 59400,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "9725db89b610135dc76cd8a21afffa83",
+      "css": "folder-locate",
+      "code": 59393,
+      "src": "linecons"
+    },
+    {
+      "uid": "e536c80e011366046360f5ffe669dbfd",
+      "css": "folder-create",
+      "code": 59395,
+      "src": "typicons"
+    },
+    {
+      "uid": "aa0d87f43ed577ed479df28dc3724c11",
+      "css": "folder-delete",
+      "code": 59396,
+      "src": "typicons"
+    },
+    {
+      "uid": "8e6b311d40f1002fd6de7d1bdfdc7f17",
+      "css": "folder-open",
+      "code": 61544,
+      "src": "mfglabs"
+    },
+    {
+      "uid": "8f28e6daf83e5c4f1fec8d170a7e21e7",
+      "css": "folder-open-med",
+      "code": 62658,
+      "src": "mfglabs"
+    },
+    {
+      "uid": "8fc56819afcd07e2786e34f18d39b71b",
+      "css": "book-open",
+      "code": 59401,
+      "src": "iconic"
+    },
+    {
+      "uid": "c95735c17a10af81448c7fed98a04546",
+      "css": "folder-open-black",
+      "code": 59402,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "6533bdc16ab201eb3f3b27ce989cab33",
+      "css": "folder-open-wide",
+      "code": 61717,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "9e1c33b6849ceb08db8acfaf02188b7d",
+      "css": "plus-sq",
+      "code": 59403,
+      "src": "entypo"
+    },
+    {
+      "uid": "4ffa544c1a81c905f0a8a5745d8b9faa",
+      "css": "minus-sq",
+      "code": 59404,
+      "src": "entypo"
+    },
+    {
+      "uid": "d02a803276d9e1f42b7393964aa22ce9",
+      "css": "show-favorite",
+      "code": 59392,
+      "src": "mfglabs"
+    },
+    {
+      "uid": "862129f833b09f3d34ae39acf8484a7b",
+      "css": "heart-broken",
+      "code": 61480,
+      "src": "mfglabs"
+    },
+    {
+      "uid": "2a3cd95de2621bd87479396f236fd2a4",
+      "css": "heart-black",
+      "code": 59405,
+      "src": "websymbols"
+    },
+    {
+      "uid": "1bcc6c6369c3d475fa27115f806ff2ad",
+      "css": "heart-white",
+      "code": 59406,
+      "src": "websymbols"
+    },
+    {
+      "uid": "a19527dd18f0e45e597e8a2622604d14",
+      "css": "show-active",
+      "code": 59407,
+      "src": "typicons"
+    },
+    {
+      "uid": "acf41aa4018e58d49525665469e35665",
+      "css": "thumbs-up",
+      "code": 59408,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "7533e68038fc6d520ede7a7ffa0a2f64",
+      "css": "thumbs-down",
+      "code": 59410,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "c6344a6ed148da12354cc90705287696",
+      "css": "search-small",
+      "code": 59411,
+      "src": "iconic"
+    },
+    {
+      "uid": "0f4cae16f34ae243a6144c18a003f2d8",
+      "css": "close-black",
+      "code": 59413,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "2e2dba0307a502a8507c1729084c7ab5",
+      "css": "close-white",
+      "code": 59414,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "fd32deda7b2f5b8cad46d13897c19ae8",
+      "css": "cancel-black",
+      "code": 59415,
+      "src": "elusive"
+    },
+    {
+      "uid": "74415da8e36ed0afcea9b2b1454f4176",
+      "css": "cancel-white",
+      "code": 59416,
+      "src": "elusive"
+    },
+    {
+      "uid": "1400d5103edd2fa6d2d61688fee79a5a",
+      "css": "folder-read-tree",
+      "code": 61770,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "6a12c2b74456ea21cc984e11dec227a1",
+      "css": "show-all",
+      "code": 59409,
+      "src": "entypo"
+    }
+  ]
+}
