@@ -58,8 +58,11 @@ $labels['message_move'] = 'Move to folder';
 
 $labels['folder_menu'] = 'Folder Menu';
 
+$labels['activate_plugin'] = 'Activate plugin';
+
 $labels['enable_logging'] = 'Enable plugin logging';
 $labels['enable_refresh'] = 'Enable folder tree refresh';
+$labels['enable_client_filter'] = 'Enable filter on client';
 $labels['enable_folder_list_context_menu'] = 'Enable folder list context menu';
 $labels['enable_folder_list_control_menu'] = 'Enable folder list control menu';
 $labels['enable_message_list_context_menu'] = 'Enable message list context menu';

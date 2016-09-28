@@ -34,3 +34,17 @@ div.contextmenu.rcmmainmenu ul.iconized li a.override span.icon {
     display: inline-block;
     padding-left: 0.2em;
 }
+
+
+/* larry: tree list */
+
+ul.treelist li a[class*="folder-icon-"]:before {
+    position: relative;
+    font-size: 0.8em;
+    opacity: 0.7;
+    padding: 0em;
+    margin: 0em;
+    width: 0em;
+    left: -3.5em;
+    top: -0.5em;
+}
