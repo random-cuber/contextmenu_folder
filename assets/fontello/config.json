@@ -179,6 +179,12 @@
       "css": "show-all",
       "code": 59409,
       "src": "entypo"
+    },
+    {
+      "uid": "8b80d36d4ef43889db10bc1f0dc9a862",
+      "css": "user",
+      "code": 59412,
+      "src": "fontawesome"
     }
   ]
 }

@@ -143,7 +143,7 @@ class contextmenu_folder extends rcube_plugin {
         $this->register_action($this->key('folder_locate'), array($this, 'action_folder_locate'));
         $this->register_action($this->key('folder_rename'), array($this, 'action_folder_rename'));
         $this->register_action($this->key('folder_select'), array($this, 'action_folder_select'));
-        $this->register_action($this->key('folder_tree_read'), array($this, 'action_folder_tree_read'));
+        $this->register_action($this->key('folder_scan_tree'), array($this, 'action_folder_scan_tree'));
     }
 
     // mail
@@ -367,7 +367,7 @@ class contextmenu_folder extends rcube_plugin {
         return $args;
     }
 
-    // periodic folder tree refresh 
+    // TODO periodic folder tree refresh 
     function hook_refresh($args) {
         if($this->config_get('enable_refresh')) {
             $this->log('TODO ');
@@ -387,11 +387,12 @@ class contextmenu_folder extends rcube_plugin {
         return $args;
     }
     
+    // TODO auto show 'active' mailboxes
     function hook_new_messages($args){
         return $args;
     }
 
-    // provide filtered mail box view
+    // provide filtered mail box view (server filter)
     function hook_render_mailboxlist($args) {
         if( $this->is_client_filter() ) {
             return $args;
@@ -604,22 +605,29 @@ class contextmenu_folder extends rcube_plugin {
     }
 
     // recursively navigate mail box and its descendats and mark all as read
-    public function action_folder_tree_read() {
+    public function action_folder_scan_tree() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;
         
         $target = $this->input_value('target');
-        $mark_mode = $this->input_value('mark_mode');
+        $scan_mode = $this->input_value('scan_mode');
         
-        $this->folder_mark_read($target);
-        
-        if($mark_mode == 'mark-tree') {
+        switch($scan_mode) {
+        case 'read_this':
+            $this->folder_mark_read($target);
+            break;
+        case 'read_tree':
+            $this->folder_mark_read($target);
             $delimiter = $this->hierarchy_delimiter();
             $pattern = $target . $delimiter . '*';
             $folder_list = $storage->list_folders(self::ROOT, $pattern, 'mail', null, false);
             foreach($folder_list as $folder) {
                 $this->folder_mark_read($folder);
             }
+            break;
+        default:
+            $this->log('invalid $scan_mode' . $scan_mode, true);
+            return;
         }
         
         $output->send();

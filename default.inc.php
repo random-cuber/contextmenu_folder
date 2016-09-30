@@ -72,7 +72,7 @@ $config['plugin.contextmenu_folder.collect_predefined'] = array(
 );
 
 // expiration time for auto reset of transient mail box collection, minutes
-$config['plugin.contextmenu_folder.transient_expire_time'] = 100;
+$config['plugin.contextmenu_folder.transient_expire_time'] = 100; // TODO
 
 // last selected show mode
 $config['plugin.contextmenu_folder.show_mode'] = 'show_all';
@@ -167,7 +167,7 @@ $config['plugin.contextmenu_folder.settings_area_list'] = array(
 
 // expose these settings in user ui
 $config['plugin.contextmenu_folder.settings_text_list'] = array(
-        // 'transient_expire_time',
+        // 'transient_expire_time', // TODO
         // 'icon_class_selected',
 );
 

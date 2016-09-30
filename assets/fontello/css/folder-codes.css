@@ -19,6 +19,7 @@
 .folder-icon-show-all:before { content: '\e811'; } /* '' */
 .folder-icon-thumbs-down:before { content: '\e812'; } /* '' */
 .folder-icon-search-small:before { content: '\e813'; } /* '' */
+.folder-icon-user:before { content: '\e814'; } /* '' */
 .folder-icon-close-black:before { content: '\e815'; } /* '' */
 .folder-icon-close-white:before { content: '\e816'; } /* '' */
 .folder-icon-cancel-black:before { content: '\e817'; } /* '' */
