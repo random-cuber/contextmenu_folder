@@ -14,7 +14,7 @@ class contextmenu_folder extends rcube_plugin {
         'predefined',
     );
     
-    // allow client pref save on demand
+    // client environment variables, save back
     private static $allowed_names = array(
         'show_mode',
         'collect_special',
@@ -27,7 +27,7 @@ class contextmenu_folder extends rcube_plugin {
         'memento_contact_format_item',
     );
     
-    // extra client environment variables
+    // client environment variables, publish only
     private static $environ_names = array(
         'activate_plugin',
         'enable_logging', 
@@ -40,6 +40,21 @@ class contextmenu_folder extends rcube_plugin {
         'filter_favorite',
         'icon_class_selected',
         'contact_folder_format_list', 
+    );
+    
+    // plugin ajax registered actions
+    private static $action_names = array(
+        'show_mode',
+        'collect_list',
+        'collect_reset',
+        'header_list',
+        'folder_list',
+        'folder_create',
+        'folder_delete',
+        'folder_locate',
+        'folder_rename',
+        'folder_select',
+        'folder_scan_tree',
     );
 
     const ROOT = ''; // root of mailbox hierarchy
@@ -61,20 +76,32 @@ class contextmenu_folder extends rcube_plugin {
         $this->require_plugin('jqueryui');
         $this->require_plugin('contextmenu');
         $task = $this->rc->task; $action = $this->rc->action;
-        if ($task == 'mail' && $this->is_plugin_action($action)) {
-            // keep order
-            $this->provide_config_default();
-            $this->init_mail_hook();
-            $this->init_mail_action();
-            $this->provide_collect_special();
-            $this->provide_collect_predefined();
-            $this->init_mail_html_page();
+        if ($task == 'mail' && $this->is_root_request()) {
+            // periodic client pull
+            if($action == 'refresh') {
+                $this->init_config();
+                $this->init_refresh_hook();
+                return;
+            }
+            // plugin ajax action post
+            if (strpos($action, $this->key('')) === 0) {
+                $this->init_config();
+                $this->init_mail_action();
+                return;
+            }
+            // application window load
+            if ( $action == '' && $this->is_html_request()) {
+                $this->init_config();
+                $this->init_mail_hook();
+                $this->init_mail_html_page();
+                return;
+            }
         }
         if ($task == 'settings') {
-            // keep order
-            $this->provide_config_default();
+            $this->init_config();
             $this->init_settings_hook();
             $this->init_settings_html_page();
+            return;
         }
     }
     
@@ -124,7 +151,7 @@ class contextmenu_folder extends rcube_plugin {
     }
     
     // load plugin default configuration file
-    function provide_config_default($name = 'default.inc.php') {
+    function provide_default($name = 'default.inc.php') {
         $config = null;
         $path = $this->home . '/' . $name;
         if ($path && is_file($path) && is_readable($path)) {
@@ -136,51 +163,46 @@ class contextmenu_folder extends rcube_plugin {
             $this->config_default = $config;
         }
     }
-    
+
     ////////////////////////////
-    
-    // match action prefix to plugin name space
-    function is_plugin_action($action) {
-        return $action == '' || $action == 'refresh' || 0 === strpos($action, $this->key(''));
+
+    // setup config with default override
+    function init_config() {
+        $this->add_hook('config_get', array($this, 'hook_config_get'));
+        $this->provide_default();
+        $this->provide_collect_special();
+        $this->provide_collect_predefined();
     }
-    
+
     // mail
     function init_mail_hook() {
         $this->add_hook('refresh', array($this, 'hook_refresh'));
-        $this->add_hook('config_get', array($this, 'hook_config_get'));
-        $this->add_hook('new_messages', array($this, 'hook_new_messages'));
         $this->add_hook('render_mailboxlist', array($this, 'hook_render_mailboxlist'));
         $this->add_hook('preferences_update', array($this, 'hook_preferences_update'));
     }
     
     // mail
     function init_mail_action() {
-        $this->register_action($this->key('show_mode'), array($this, 'action_show_mode'));
-        $this->register_action($this->key('collect_list'), array($this, 'action_collect_list'));
-        $this->register_action($this->key('collect_reset'), array($this, 'action_collect_reset'));
-        $this->register_action($this->key('header_list'), array($this, 'action_header_list'));
-        $this->register_action($this->key('folder_list'), array($this, 'action_folder_list'));
-        $this->register_action($this->key('folder_create'), array($this, 'action_folder_create'));
-        $this->register_action($this->key('folder_delete'), array($this, 'action_folder_delete'));
-        $this->register_action($this->key('folder_locate'), array($this, 'action_folder_locate'));
-        $this->register_action($this->key('folder_rename'), array($this, 'action_folder_rename'));
-        $this->register_action($this->key('folder_select'), array($this, 'action_folder_select'));
-        $this->register_action($this->key('folder_scan_tree'), array($this, 'action_folder_scan_tree'));
+        foreach(self::$action_names as $name) {
+            $this->register_action($this->key($name), array($this, 'action_' . $name));
+        }
     }
 
     // mail
     function init_mail_html_page() {
-        $output = $this->rc->output;
-        if ($output->type == 'html') {
-            $this->add_texts('localization', true);
-            $this->include_script('contextmenu_folder.js');
-            $this->include_stylesheet( 'skins' . '/style.css');
-            $this->include_stylesheet($this->local_skin_path() . '/style.css');
-            $this->include_stylesheet( 'assets/fontello/css/folder.css');
-            $this->provide_client_env_var();
-        }
+        $this->add_texts('localization', true);
+        $this->include_script('contextmenu_folder.js');
+        $this->include_stylesheet( 'assets/fontello/css/folder.css');
+        $this->include_stylesheet( 'skins' . '/style.css');
+        $this->include_stylesheet($this->local_skin_path() . '/style.css');
+        $this->provide_client_env_var();
     }
     
+    // refresh
+    function init_refresh_hook() {
+        $this->add_hook('new_messages', array($this, 'hook_new_messages'));
+    }
+
     // client environment variables
     function set_env($name, $value = null) {
         $key = $this->key($name);
@@ -207,6 +229,21 @@ class contextmenu_folder extends rcube_plugin {
         foreach($name_list as $name) {
            $this->set_env($name);
         }
+    }
+    
+    // root vs frame window request
+    function is_root_request() {
+        return empty($_REQUEST['_framed']);
+    }
+    
+    // html vs ajax request
+    function is_html_request() {
+        return $this->rc->output->type == 'html';
+    }
+    
+    // root vs frame window request
+    function is_frame_request() {
+        return isset($_REQUEST['_framed']);
     }
     
     // apply mailbox filter on server vs on client
@@ -404,8 +441,10 @@ class contextmenu_folder extends rcube_plugin {
         return $args;
     }
     
-    // TODO auto show 'active' mailboxes
+    // notification for auto show 'unread' mailboxes
     function hook_new_messages($args){
+        $output = $this->rc->output;
+        $output->command($this->key('folder_notify'), array('folder' => $args['mailbox']));
         return $args;
     }
 
@@ -712,7 +751,6 @@ class contextmenu_folder extends rcube_plugin {
     
     // settings
     function init_settings_hook() {
-        $this->add_hook('config_get', array($this, 'hook_config_get'));
         $this->add_hook('preferences_list', array($this, 'hook_preferences_list'));
         $this->add_hook('preferences_save', array($this, 'hook_preferences_save'));
     }

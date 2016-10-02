@@ -146,7 +146,7 @@ $config['plugin.contextmenu_folder.settings_checkbox_list'] = array(
         // 'activate_plugin', // TODO 
         'enable_logging', 
         // 'enable_refresh', // TODO 
-        'enable_client_filter',
+        // 'enable_client_filter',
         'enable_folder_list_context_menu', 
         'enable_folder_list_control_menu',
         'enable_message_list_context_menu',
