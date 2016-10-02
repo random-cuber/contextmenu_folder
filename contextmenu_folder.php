@@ -14,20 +14,22 @@ class contextmenu_folder extends rcube_plugin {
         'predefined',
     );
     
-    // client environment variables, save back
+    // client environment variables, push/pull
     private static $allowed_names = array(
         'show_mode',
         'collect_special',
         'collect_selected',
         'collect_transient',
         'collect_predefined',
+        'memento_current_mailbox',
+        'memento_current_message',
         'memento_folder_locate_text',
         'memento_contact_parent_item',
         'memento_contact_header_item',
         'memento_contact_format_item',
     );
     
-    // client environment variables, publish only
+    // client environment variables, push only
     private static $environ_names = array(
         'activate_plugin',
         'enable_logging', 
@@ -39,7 +41,10 @@ class contextmenu_folder extends rcube_plugin {
         'filter_active',
         'filter_favorite',
         'icon_class_selected',
-        'contact_folder_format_list', 
+        'contact_folder_format_list',
+        'feature_remember_filter',
+        'feature_remember_mailbox',
+        'feature_remember_message',
     );
     
     // plugin ajax registered actions

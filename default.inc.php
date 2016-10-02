@@ -78,10 +78,17 @@ $config['plugin.contextmenu_folder.transient_expire_time'] = 100; // TODO
 $config['plugin.contextmenu_folder.show_mode'] = 'show_all';
 
 // client ui state 
+$config['plugin.contextmenu_folder.memento_current_mailbox'] = 'INBOX';
+$config['plugin.contextmenu_folder.memento_current_message'] = '0';
 $config['plugin.contextmenu_folder.memento_folder_locate_text'] = 'mbox name';
 $config['plugin.contextmenu_folder.memento_contact_parent_item'] = '0';
 $config['plugin.contextmenu_folder.memento_contact_header_item'] = '0';
 $config['plugin.contextmenu_folder.memento_contact_format_item'] = '0';
+
+// client ui behaviour
+$config['plugin.contextmenu_folder.feature_remember_filter'] = true;
+$config['plugin.contextmenu_folder.feature_remember_mailbox'] = true;
+$config['plugin.contextmenu_folder.feature_remember_message'] = true;
 
 // rules for making contact folder derived from mail headers
 $config['plugin.contextmenu_folder.contact_folder_format_list'] = array(
@@ -150,6 +157,9 @@ $config['plugin.contextmenu_folder.settings_checkbox_list'] = array(
         'enable_folder_list_context_menu', 
         'enable_folder_list_control_menu',
         'enable_message_list_context_menu',
+        // 'feature_remember_filter',
+        // 'feature_remember_mailbox',
+        // 'feature_remember_message',
 );
 
 // expose these settings in user ui
