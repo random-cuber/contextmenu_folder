@@ -244,7 +244,7 @@ function plugin_contextmenu_folder() {
 
 	// folder: show, expand, scroll, refresh,
 	this.mbox_locate = function mbox_locate(mbox) {
-		var mbox = mbox ? mbox : self.selected_folder;
+		var mbox = mbox ? mbox : self.mbox_source();
 		self.log('mbox: ' + mbox);
 		self.mbox_show_tree(mbox);
 		rcmail.select_folder(mbox);
@@ -260,7 +260,7 @@ function plugin_contextmenu_folder() {
 		var row = rows[uid] ? rows[uid] : {};
 		var row_id = row.id ? row.id : 'invalid';
 		self.log('uid: ' + uid + ' row_id: ' + row_id);
-		message_list.select(uid);
+		message_list && message_list.select(uid);
 	}
 
 	// empty folder collection
@@ -463,15 +463,17 @@ function plugin_contextmenu_folder() {
 	}
 
 	// discover folder to be used by the command
-	this.mbox_source = function(param) {
+	this.mbox_source = function mbox_source(param) {
 		var source;
 		if (self.selected_folder) {
 			source = self.selected_folder;
 		} else if (rcmail.env.mailbox) {
 			source = rcmail.env.mailbox;
+		} else if (param) {
+			source = param;
 		} else {
+			source = '';
 			self.log('missing source', true);
-			return;
 		}
 		return source;
 	}
@@ -1890,42 +1892,33 @@ plugin_contextmenu_folder.prototype.mesg_list_context_menu = function mesg_list_
 		label : self.localize('message_copy'),
 		command : self.key('message_copy'),
 		props : '',
-		classes : 'copy copycontact',
+		classes : 'copy copycontact', // FIXME css
 	});
 	menu.menu_source.push({
 		label : self.localize('message_move'),
 		command : self.key('message_move'),
 		props : '',
-		classes : 'move movecontact',
+		classes : 'move movecontact', // FIXME css
 	});
 
 }
 
 // plugin singleton
-if (rcmail) {
+if (rcmail && !rcmail.is_framed()) {
 
 	// build instance
 	rcmail.addEventListener('init', function instance(param) {
-		if (rcmail.is_framed()) {
-			return;
-		}
 		plugin_contextmenu_folder.instance = new plugin_contextmenu_folder();
 	});
 
 	// build control menu
 	rcmail.addEventListener('init', function control_menu(param) {
-		if (rcmail.is_framed()) {
-			return;
-		}
 		var instance = plugin_contextmenu_folder.instance;
 		instance.mbox_list_control_menu();
 	});
 
 	// build context menu
 	rcmail.addEventListener('contextmenu_init', function context_menu(menu) {
-		if (rcmail.is_framed()) {
-			return;
-		}
 		var instance = plugin_contextmenu_folder.instance;
 		instance.mbox_list_context_menu(menu);
 		instance.mesg_list_context_menu(menu);
