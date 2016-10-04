@@ -445,6 +445,19 @@ function plugin_contextmenu_folder() {
 		self.parent_list = parent_list;
 	}
 
+	// TODO
+	this.update_collect = function update_collect(action, name, mbox) {
+		var collect = name; // XXX
+		switch (action) {
+		case 'create':
+			collect[mbox] = mbox;
+			break;
+		case 'delete':
+			delete collect[mbox];
+			break;
+		}
+	}
+
 	// remember between sessions
 	this.update_current_mailbox = function(mailbox) {
 		var mailbox = mailbox ? mailbox : rcmail.env.mailbox;
@@ -588,6 +601,11 @@ function plugin_contextmenu_folder() {
 		};
 	}
 
+	//
+	this.is_plugin_active = function is_plugin_active() {
+		return self.env('activate_plugin');
+	}
+
 	// //
 
 	this.initialize();
@@ -677,6 +695,13 @@ plugin_contextmenu_folder.prototype.html_list = function html_list(args, opts) {
 // plugin setup
 plugin_contextmenu_folder.prototype.initialize = function initialize() {
 	var self = this;
+
+	if (self.is_plugin_active()) {
+		self.log('enabled');
+	} else {
+		self.log('disabled');
+		return;
+	}
 
 	if (rcmail.env['framed']) {
 		self.log('idle: frame');
@@ -771,8 +796,8 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 					if (self.env('feature_remember_message')) {
 						self.mesg_locate(self.env('memento_current_message'));
 					}
-				}, 500);
-			}, 500);
+				}, 1500);
+			}, 1500);
 		}, 1500);
 	} else {
 		// noop
@@ -1903,8 +1928,8 @@ plugin_contextmenu_folder.prototype.mesg_list_context_menu = function mesg_list_
 
 }
 
-// plugin singleton
-if (rcmail && !rcmail.is_framed()) {
+// plugin context
+if (window.rcmail && !rcmail.is_framed()) {
 
 	// build instance
 	rcmail.addEventListener('init', function instance(param) {
@@ -1914,14 +1939,18 @@ if (rcmail && !rcmail.is_framed()) {
 	// build control menu
 	rcmail.addEventListener('init', function control_menu(param) {
 		var instance = plugin_contextmenu_folder.instance;
-		instance.mbox_list_control_menu();
+		if (instance && instance.is_plugin_active()) {
+			instance.mbox_list_control_menu();
+		}
 	});
 
 	// build context menu
 	rcmail.addEventListener('contextmenu_init', function context_menu(menu) {
 		var instance = plugin_contextmenu_folder.instance;
-		instance.mbox_list_context_menu(menu);
-		instance.mesg_list_context_menu(menu);
+		if (instance && instance.is_plugin_active()) {
+			instance.mbox_list_context_menu(menu);
+			instance.mesg_list_context_menu(menu);
+		}
 	});
 
 }

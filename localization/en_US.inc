@@ -57,7 +57,7 @@ $labels['message_move'] = 'Move to folder';
 
 // settings
 
-$labels['folder_menu'] = 'Folder Menu';
+$labels['plugin_folder_menu'] = 'Plugin: Folder Menu';
 
 $labels['activate_plugin'] = 'Activate plugin';
 

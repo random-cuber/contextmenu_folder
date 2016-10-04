@@ -832,7 +832,7 @@ class contextmenu_folder extends rcube_plugin {
             $blocks = & $args['blocks'];
             $section = $this->key('section');
             $blocks[$section] = array(); $entry = & $blocks[$section];
-            $entry['name'] = $this->quoted('folder_menu');
+            $entry['name'] = $this->quoted('plugin_folder_menu');
             foreach($this->settings_checkbox_list() as $name) {
                 $this->build_checkbox($entry, $name);
             }

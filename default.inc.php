@@ -9,7 +9,7 @@ $config = array();
 $config['plugin.contextmenu_folder.activate_plugin'] = true;
 
 // plugin logging for debugging
-$config['plugin.contextmenu_folder.enable_logging'] = false;
+$config['plugin.contextmenu_folder.enable_logging'] = true;
 
 // periodic background folder list refresh
 $config['plugin.contextmenu_folder.enable_refresh'] = false; // TODO
@@ -150,7 +150,7 @@ $config['plugin.contextmenu_folder.domain_country_list'] = array(
 
 // expose these settings in user ui
 $config['plugin.contextmenu_folder.settings_checkbox_list'] = array(
-        // 'activate_plugin', // TODO 
+        'activate_plugin',
         'enable_logging', 
         // 'enable_refresh', // TODO 
         // 'enable_client_filter',
