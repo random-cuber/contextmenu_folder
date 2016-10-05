@@ -697,9 +697,9 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 	var self = this;
 
 	if (self.is_plugin_active()) {
-		self.log('enabled');
+		self.log('active');
 	} else {
-		self.log('disabled');
+		self.log('inactive');
 		return;
 	}
 
@@ -780,7 +780,7 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 	}, 500);
 
 	if (self.is_client_filter()) {
-		// FIXME replace delays with events
+		// FIXME replace delays with ready-events
 		window.setTimeout(function remember_filter() {
 			self.log('...');
 			if (self.env('feature_remember_filter')) {
@@ -1067,11 +1067,17 @@ plugin_contextmenu_folder.prototype.folder_create = function folder_create() {
 		id : 'target',
 		type : 'text',
 		size : 55
-	}).val(target).keypress(function(event) {
+	}).keypress(function(event) {
 		if (event.which == 13) {
 			$('#submit').click();
 		}
-	});
+	}).on('input', function(event) {
+		if (source == $('#target').val()) {
+			$('#submit').prop('disabled', true);
+		} else {
+			$('#submit').prop('disabled', false);
+		}
+	}).val(target);
 
 	var source_label = $('<label>').text(self.localize('folder'));
 	var target_label = $('<label>').text(self.localize('folder'));
@@ -1931,7 +1937,7 @@ plugin_contextmenu_folder.prototype.mesg_list_context_menu = function mesg_list_
 // plugin context
 if (window.rcmail && !rcmail.is_framed()) {
 
-	// build instance
+	// plugin instance
 	rcmail.addEventListener('init', function instance(param) {
 		plugin_contextmenu_folder.instance = new plugin_contextmenu_folder();
 	});
