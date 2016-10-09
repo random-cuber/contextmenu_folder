@@ -592,6 +592,24 @@ class contextmenu_folder extends rcube_plugin {
         }
     }
 
+    // recursive delete tree bottom up
+    // https://github.com/roundcube/roundcubemail/issues/5466
+    function folder_delete($target) {
+        $storage = $this->rc->storage;
+        $delimiter = $this->hierarchy_delimiter();
+        $pattern = $target . $delimiter . '%'; // own leaf only
+        $folder_list = $storage->list_folders(self::ROOT, $pattern, 'mail', null, false);
+        foreach($folder_list as $folder) {
+            if($this->folder_delete($folder)) {
+                continue;
+            } else {
+                return false;
+            }
+        }
+        $this->log($target);
+        return $storage->delete_folder($target);
+    }
+
     // delete imap mailbox and switch ui to parent
     public function action_folder_delete() {
         $output = $this->rc->output;
@@ -599,7 +617,8 @@ class contextmenu_folder extends rcube_plugin {
           
         $source = '';
         $target = $this->input_value('target');
-        $result = $storage->delete_folder($target);
+        $result = $this->folder_delete($target);
+        // $result = $storage->delete_folder($target);
         if ($result) {
             $this->folder_transient_unset($target);
             $parent = $this->parent_mbox($target);

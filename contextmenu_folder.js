@@ -547,7 +547,7 @@ function plugin_contextmenu_folder() {
 	}
 
 	// convert keys to clicks
-	this.key_enter = function(id, event) {
+	this.key_enter = function key_enter(id, event) {
 		switch (event.which) {
 		case 9: // tab
 		case 27: // esc
@@ -568,7 +568,9 @@ function plugin_contextmenu_folder() {
 			submit && submit.name ? submit.name : 'submit'),
 			class : 'mainaction',
 			click : function() {
-				submit && submit.func ? submit.func() : true;
+				if (!$('#submit').prop('disabled')) {
+					submit && submit.func ? submit.func() : true;
+				}
 				$(this).dialog('close');
 			},
 			keydown : self.key_enter.bind(null, 'submit'),
@@ -577,7 +579,9 @@ function plugin_contextmenu_folder() {
 			text : self.localize( //
 			cancel && cancel.name ? cancel.name : 'cancel'),
 			click : function() {
-				cancel && cancel.func ? cancel.func() : true;
+				if (!$('#cancel').prop('disabled')) {
+					cancel && cancel.func ? cancel.func() : true;
+				}
 				$(this).dialog('close');
 			},
 			keydown : self.key_enter.bind(null, 'cancel'),
@@ -704,7 +708,7 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 	}
 
 	if (rcmail.env['framed']) {
-		self.log('idle: frame');
+		self.log('error: framed', true);
 		return;
 	}
 
@@ -763,7 +767,10 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 	rcmail.addEventListener('menu-open', rcmail_menu_work.bind(null, 'open'));
 	rcmail.addEventListener('menu-close', rcmail_menu_work.bind(null, 'close'));
 	rcmail.addEventListener('selectfolder', rcmail_select_folder);
-	rcmail.message_list.addEventListener('select', rcmail_select_message);
+
+	if (rcmail.message_list) {
+		rcmail.message_list.addEventListener('select', rcmail_select_message);
+	}
 
 	self.ajax_header_list.bind();
 	self.ajax_folder_list.bind();
@@ -1072,12 +1079,12 @@ plugin_contextmenu_folder.prototype.folder_create = function folder_create() {
 			$('#submit').click();
 		}
 	}).on('input', function(event) {
-		if (source == $('#target').val()) {
-			$('#submit').prop('disabled', true);
-		} else {
-			$('#submit').prop('disabled', false);
-		}
+		render();
 	}).val(target);
+
+	function render() {
+		$('#submit').prop('disabled', source == $('#target').val());
+	}
 
 	var source_label = $('<label>').text(self.localize('folder'));
 	var target_label = $('<label>').text(self.localize('folder'));
@@ -1172,9 +1179,7 @@ plugin_contextmenu_folder.prototype.folder_delete = function folder_delete() {
 	function render() {
 		var type = self.mbox_type(source);
 		if (type == 'special') {
-			$('#submit').attr({
-				disabled : 'disabled',
-			});
+			$('#submit').prop('disabled', true);
 		}
 	}
 
@@ -1218,6 +1223,8 @@ plugin_contextmenu_folder.prototype.folder_rename = function folder_rename() {
 		if (event.which == 13) {
 			$('#submit').click();
 		}
+	}).on('input', function(event) {
+		render();
 	});
 
 	var source_label = $('<label>').text(self.localize('source'));
@@ -1248,10 +1255,10 @@ plugin_contextmenu_folder.prototype.folder_rename = function folder_rename() {
 	function render() {
 		var type = self.mbox_type(source);
 		if (type == 'special') {
-			$('#submit').attr({
-				disabled : 'disabled',
-			});
+			$('#submit').prop('disabled', true);
+			return;
 		}
+		$('#submit').prop('disabled', source == $('#target').val());
 	}
 
 	function open() {
