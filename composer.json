@@ -5,7 +5,7 @@
 	"homepage": "https://github.com/random-cuber/contextmenu_folder",
 	"license": "Apache",
 	"type": "roundcube-plugin",
-	"version": "1.2.34",
+	"version": "1.2.35",
 	"authors": [{
 		"name": "Andrei Pozolotin",
 		"email": "andrei.pozolotin@gmail.com",
