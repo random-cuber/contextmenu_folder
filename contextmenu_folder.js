@@ -445,6 +445,19 @@ function plugin_contextmenu_folder() {
 		self.parent_list = parent_list;
 	}
 
+	// TODO
+	this.update_collect = function update_collect(action, name, mbox) {
+		var collect = name; // XXX
+		switch (action) {
+		case 'create':
+			collect[mbox] = mbox;
+			break;
+		case 'delete':
+			delete collect[mbox];
+			break;
+		}
+	}
+
 	// remember between sessions
 	this.update_current_mailbox = function(mailbox) {
 		var mailbox = mailbox ? mailbox : rcmail.env.mailbox;
@@ -534,7 +547,7 @@ function plugin_contextmenu_folder() {
 	}
 
 	// convert keys to clicks
-	this.key_enter = function(id, event) {
+	this.key_enter = function key_enter(id, event) {
 		switch (event.which) {
 		case 9: // tab
 		case 27: // esc
@@ -555,7 +568,9 @@ function plugin_contextmenu_folder() {
 			submit && submit.name ? submit.name : 'submit'),
 			class : 'mainaction',
 			click : function() {
-				submit && submit.func ? submit.func() : true;
+				if (!$('#submit').prop('disabled')) {
+					submit && submit.func ? submit.func() : true;
+				}
 				$(this).dialog('close');
 			},
 			keydown : self.key_enter.bind(null, 'submit'),
@@ -564,7 +579,9 @@ function plugin_contextmenu_folder() {
 			text : self.localize( //
 			cancel && cancel.name ? cancel.name : 'cancel'),
 			click : function() {
-				cancel && cancel.func ? cancel.func() : true;
+				if (!$('#cancel').prop('disabled')) {
+					cancel && cancel.func ? cancel.func() : true;
+				}
 				$(this).dialog('close');
 			},
 			keydown : self.key_enter.bind(null, 'cancel'),
@@ -586,6 +603,11 @@ function plugin_contextmenu_folder() {
 				$(this).remove();
 			},
 		};
+	}
+
+	//
+	this.is_plugin_active = function is_plugin_active() {
+		return self.env('activate_plugin');
 	}
 
 	// //
@@ -678,8 +700,15 @@ plugin_contextmenu_folder.prototype.html_list = function html_list(args, opts) {
 plugin_contextmenu_folder.prototype.initialize = function initialize() {
 	var self = this;
 
+	if (self.is_plugin_active()) {
+		self.log('active');
+	} else {
+		self.log('inactive');
+		return;
+	}
+
 	if (rcmail.env['framed']) {
-		self.log('idle: frame');
+		self.log('error: framed', true);
 		return;
 	}
 
@@ -738,7 +767,10 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 	rcmail.addEventListener('menu-open', rcmail_menu_work.bind(null, 'open'));
 	rcmail.addEventListener('menu-close', rcmail_menu_work.bind(null, 'close'));
 	rcmail.addEventListener('selectfolder', rcmail_select_folder);
-	rcmail.message_list.addEventListener('select', rcmail_select_message);
+
+	if (rcmail.message_list) {
+		rcmail.message_list.addEventListener('select', rcmail_select_message);
+	}
 
 	self.ajax_header_list.bind();
 	self.ajax_folder_list.bind();
@@ -755,7 +787,7 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 	}, 500);
 
 	if (self.is_client_filter()) {
-		// FIXME replace delays with events
+		// FIXME replace delays with ready-events
 		window.setTimeout(function remember_filter() {
 			self.log('...');
 			if (self.env('feature_remember_filter')) {
@@ -771,8 +803,8 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 					if (self.env('feature_remember_message')) {
 						self.mesg_locate(self.env('memento_current_message'));
 					}
-				}, 500);
-			}, 500);
+				}, 1500);
+			}, 1500);
 		}, 1500);
 	} else {
 		// noop
@@ -1042,11 +1074,17 @@ plugin_contextmenu_folder.prototype.folder_create = function folder_create() {
 		id : 'target',
 		type : 'text',
 		size : 55
-	}).val(target).keypress(function(event) {
+	}).keypress(function(event) {
 		if (event.which == 13) {
 			$('#submit').click();
 		}
-	});
+	}).on('input', function(event) {
+		render();
+	}).val(target);
+
+	function render() {
+		$('#submit').prop('disabled', source == $('#target').val());
+	}
 
 	var source_label = $('<label>').text(self.localize('folder'));
 	var target_label = $('<label>').text(self.localize('folder'));
@@ -1141,9 +1179,7 @@ plugin_contextmenu_folder.prototype.folder_delete = function folder_delete() {
 	function render() {
 		var type = self.mbox_type(source);
 		if (type == 'special') {
-			$('#submit').attr({
-				disabled : 'disabled',
-			});
+			$('#submit').prop('disabled', true);
 		}
 	}
 
@@ -1187,6 +1223,8 @@ plugin_contextmenu_folder.prototype.folder_rename = function folder_rename() {
 		if (event.which == 13) {
 			$('#submit').click();
 		}
+	}).on('input', function(event) {
+		render();
 	});
 
 	var source_label = $('<label>').text(self.localize('source'));
@@ -1217,10 +1255,10 @@ plugin_contextmenu_folder.prototype.folder_rename = function folder_rename() {
 	function render() {
 		var type = self.mbox_type(source);
 		if (type == 'special') {
-			$('#submit').attr({
-				disabled : 'disabled',
-			});
+			$('#submit').prop('disabled', true);
+			return;
 		}
+		$('#submit').prop('disabled', source == $('#target').val());
 	}
 
 	function open() {
@@ -1903,10 +1941,10 @@ plugin_contextmenu_folder.prototype.mesg_list_context_menu = function mesg_list_
 
 }
 
-// plugin singleton
-if (rcmail && !rcmail.is_framed()) {
+// plugin context
+if (window.rcmail && !rcmail.is_framed()) {
 
-	// build instance
+	// plugin instance
 	rcmail.addEventListener('init', function instance(param) {
 		plugin_contextmenu_folder.instance = new plugin_contextmenu_folder();
 	});
@@ -1914,14 +1952,18 @@ if (rcmail && !rcmail.is_framed()) {
 	// build control menu
 	rcmail.addEventListener('init', function control_menu(param) {
 		var instance = plugin_contextmenu_folder.instance;
-		instance.mbox_list_control_menu();
+		if (instance && instance.is_plugin_active()) {
+			instance.mbox_list_control_menu();
+		}
 	});
 
 	// build context menu
 	rcmail.addEventListener('contextmenu_init', function context_menu(menu) {
 		var instance = plugin_contextmenu_folder.instance;
-		instance.mbox_list_context_menu(menu);
-		instance.mesg_list_context_menu(menu);
+		if (instance && instance.is_plugin_active()) {
+			instance.mbox_list_context_menu(menu);
+			instance.mesg_list_context_menu(menu);
+		}
 	});
 
 }
