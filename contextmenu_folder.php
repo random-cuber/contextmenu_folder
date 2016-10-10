@@ -42,9 +42,7 @@ class contextmenu_folder extends rcube_plugin {
         'filter_favorite',
         'icon_class_selected',
         'contact_folder_format_list',
-        'feature_remember_filter',
-        'feature_remember_mailbox',
-        'feature_remember_message',
+        'feature_choice',
     );
     
     // plugin ajax registered actions
@@ -706,9 +704,15 @@ class contextmenu_folder extends rcube_plugin {
             }
             break;
         default:
-            $this->log('invalid $scan_mode' . $scan_mode, true);
+            $this->log('invalid $scan_mode: ' . $scan_mode, true);
             break;
         }
+        
+        // confirm to client when done
+        $output->command($this->key('folder_scan_tree'), array(
+            'target' => $target,
+            'scan_mode' => $scan_mode,
+        ));
         
         $output->send();
     }
@@ -736,7 +740,7 @@ class contextmenu_folder extends rcube_plugin {
     }
 
     // provide structured message address headers
-    public function action_header_list(){
+    public function action_header_list() {
         $uid = $this->input_value('uid');
         $mbox = $this->input_value('mbox');
         $message = new rcube_message($uid, $mbox);
@@ -820,7 +824,10 @@ class contextmenu_folder extends rcube_plugin {
     }
 
     // settings multi select
-    function build_select(& $entry, $name, $option_list) {
+    function build_select(& $entry, $name, $option_list = null) {
+        if(! $option_list) { // list name convention
+            $option_list = $this->config_get($name . '.' . 'list');
+        }
         $key = $this->key($name);
         $select = new html_select(array(
              'id' => $key, 'name' => $key . '[]', // use array 
@@ -856,7 +863,7 @@ class contextmenu_folder extends rcube_plugin {
                 $this->build_checkbox($entry, $name);
             }
             foreach($this->settings_select_list() as $name) {
-                $this->build_select($entry, $name, self::$filter_type_list);
+                $this->build_select($entry, $name);
             }
             foreach($this->settings_area_list() as $name) {
                 $this->build_textarea($entry, $name);

@@ -68,6 +68,11 @@ function plugin_contextmenu_folder() {
 		return self.env('enable_client_filter') || false;
 	}
 
+	// client ui behaviour
+	this.has_feature = function has_feature(name) {
+		return (self.env('feature_choice') || []).indexOf(name) >= 0;
+	}
+
 	// resolve string to jquery
 	this.html_by_id = function(id) {
 		return id.startsWith('#') ? $(id) : $('[id="' + id + '"]');
@@ -298,7 +303,7 @@ function plugin_contextmenu_folder() {
 		return self.collect_special()[folder] ? 'special' : 'regular';
 	}
 
-	// processor class
+	// server request/response processor class
 	this.ajax_core = function ajax_core(name, request, response) {
 		var core = this;
 		core.name = name;
@@ -395,9 +400,30 @@ function plugin_contextmenu_folder() {
 		self.mbox_locate(locate);
 	}
 
-	// reflect server folder changes on client
+	// process server folder changes on client
 	this.ajax_folder_update = new self.ajax_core('folder_update', null,
 			make_folder_update);
+
+	// reflect server folder scan action result
+	function make_folder_scan_tree(param) {
+		self.log(self.json_encode(param, 4));
+		var scan_mode = param['scan_mode'];
+		switch (scan_mode) {
+		case 'read_this':
+		case 'read_tree':
+			if (self.has_feature('filter_on_mbox_mark_read')) {
+				self.mbox_filter_apply();
+			}
+			break;
+		default:
+			self.log('invalid scan_mode: ' + scan_mode, true);
+			return;
+		}
+	}
+
+	// process server folder scan actions
+	this.ajax_folder_scan_tree = new self.ajax_core('folder_scan_tree', null,
+			make_folder_scan_tree);
 
 	// ui object
 	this.mbox_create = function mbox_create(mbox) {
@@ -776,6 +802,7 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 	self.ajax_folder_list.bind();
 	self.ajax_folder_update.bind();
 	self.ajax_folder_notify.bind();
+	self.ajax_folder_scan_tree.bind();
 
 	self.register_command_list();
 
@@ -790,17 +817,17 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 		// FIXME replace delays with ready-events
 		window.setTimeout(function remember_filter() {
 			self.log('...');
-			if (self.env('feature_remember_filter')) {
+			if (self.has_feature('remember_filter')) {
 				self.mbox_filter_apply();
 			}
 			window.setTimeout(function remember_mailbox() {
 				self.log('...');
-				if (self.env('feature_remember_mailbox')) {
+				if (self.has_feature('remember_mailbox')) {
 					self.mbox_locate(self.env('memento_current_mailbox'));
 				}
 				window.setTimeout(function remember_message() {
 					self.log('...');
-					if (self.env('feature_remember_message')) {
+					if (self.has_feature('remember_message')) {
 						self.mesg_locate(self.env('memento_current_message'));
 					}
 				}, 1500);
@@ -977,16 +1004,22 @@ plugin_contextmenu_folder.prototype.contact_folder_create = function contact_fol
 		}
 	});
 
-	content.append($('<label>').text(self.localize('parent')));
+	function section(id) {
+		return $('<label>').css({
+			'font-weight' : 'bold',
+		}).text(self.localize(id));
+	}
+
+	content.append(section('parent'));
 	content.append(parent_part);
 	content.append($('<p>'));
-	content.append($('<label>').text(self.localize('header')));
+	content.append(section('header'));
 	content.append(header_part);
 	content.append($('<p>'));
-	content.append($('<label>').text(self.localize('format')));
+	content.append(section('format'));
 	content.append(format_part);
 	content.append($('<p>'));
-	content.append($('<label>').text(self.localize('target')));
+	content.append(section('folder'));
 	content.append($('<br>'));
 	content.append(folder_part);
 
@@ -1442,16 +1475,16 @@ plugin_contextmenu_folder.prototype.folder_scan_tree = function folder_scan_tree
 
 	var title = self.localize('folder_' + scan_mode);
 
-	var ajax = new self.ajax_core('folder_scan_tree', function request() {
-		return {
+	function post_ajax() {
+		self.ajax_folder_scan_tree.request({
 			target : target,
 			scan_mode : scan_mode,
-		}
-	});
+		});
+	}
 
 	var buttons = self.dialog_buttons({
 		name : 'apply',
-		func : ajax.request,
+		func : post_ajax,
 	});
 
 	var options = self.dialog_options('folder-icon-folder-read-tree');

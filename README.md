@@ -114,8 +114,8 @@ Mail -> [Message list] -> [Access context menu]
 
 Menu entries:
 * `Create folder` : create imap folder based on company/contact name derived from email headers
-* `Copy to folder` : copy selected mailbox messages to a folder located by quick name match
-* `Move to folder` : move selected mailbox messages to a folder located by quick name match
+* `Copy to folder` : copy selected mailbox messages to a folder located by quick folder name search
+* `Move to folder` : move selected mailbox messages to a folder located by quick folder name search
 
 
 [roundcube_arch]: https://wiki.archlinux.org/index.php/Roundcube

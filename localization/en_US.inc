@@ -68,10 +68,12 @@ $labels['enable_folder_list_context_menu'] = 'Enable mailbox list context menu';
 $labels['enable_folder_list_control_menu'] = 'Enable mailbox list control menu';
 $labels['enable_message_list_context_menu'] = 'Enable message list context menu';
 
+$labels['feature_choice'] = 'Enable plugin features';
+
 $labels['filter_active'] = 'Filters in category "active"';
 $labels['filter_favorite'] = 'Filters in category "favorite"';
 
 $labels['predefined_list'] = 'Folders in "predefined" filter';
-$labels['contact_folder_format_list'] = 'Contact mailbox format rules';
+$labels['contact_folder_format_list'] = 'Contact mailbox format templates';
 
 ?>
