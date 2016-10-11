@@ -121,7 +121,41 @@ function plugin_contextmenu_folder() {
 		}
 	}
 
-	// add/del folder css
+	// extra functions
+	this.jquery_extend = function jquery_extend() {
+		$.fn.extend({
+			// match all/any of space separated classes
+			hasClass$List : function(type, klaz_text) {
+				var mode;
+				switch (type) {
+				case 'all':
+				case 'and':
+					mode = true;
+					break;
+				case 'any':
+				case 'or':
+					mode = false;
+					break;
+				default:
+					self.log('error: type=' + type, true);
+					return false;
+				}
+				var node = this;
+				var klaz_list = klaz_text.split(' ');
+				for (var idx = 0, len = klaz_list.length; idx < len; idx++) {
+					var has_klaz = $(node).hasClass(klaz_list[idx]);
+					if (mode && has_klaz || !mode && !has_klaz) {
+						continue;
+					} else {
+						return !mode;
+					}
+				}
+				return mode;
+			},
+		});
+	}
+
+	// add/rem folder css
 	this.mbox_mark = function mbox_mark(mbox, klaz, on) {
 		var html_li_a = self.mbox_html_li_a(mbox);
 		if (on) {
@@ -131,19 +165,12 @@ function plugin_contextmenu_folder() {
 		}
 	}
 
-	// add/del 'selected' folder css
+	// add/rem 'selected' folder css
 	this.mbox_mark_selected = function mbox_mark_selected(mbox, on) {
+		if (!self.has_feature('render_selected')) {
+			return;
+		}
 		self.mbox_mark(mbox, self.icon_mapa('mark_selected'), on);
-	}
-
-	// folder is marked with a class
-	this.mbox_has_mark = function mbox_has_mark(mbox, klaz) {
-		return self.mbox_html_li_a(mbox).hasClass(klaz);
-	}
-
-	// folder is marked as 'selected'
-	this.mbox_has_mark_selected = function mbox_has_mark_selected(mbox) {
-		return self.mbox_has_mark(mbox, self.icon_mapa('mark_selected'));
 	}
 
 	// rcmail folder identity
@@ -1859,7 +1886,7 @@ plugin_contextmenu_folder.prototype.mbox_list_context_menu = function mbox_list_
 			return self.mbox_type(source) == 'regular';
 		}
 		function is_selected() {
-			return self.mbox_has_mark_selected(source);
+			return typeof self.collect_selected()[source] !== 'undefined';
 		}
 		if (args.command == self.key('folder_create')) {
 			return true;

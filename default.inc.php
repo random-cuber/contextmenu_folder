@@ -26,10 +26,7 @@ $config['plugin.contextmenu_folder.enable_folder_list_control_menu'] = true;
 // activate 'create contact folder form email address' feature
 $config['plugin.contextmenu_folder.enable_message_list_context_menu'] = true;
 
-// 'selected' folder icon, choose from assets/fontello
-$config['plugin.contextmenu_folder.icon_class_selected'] = 'folder-icon-heart-white';
-
-// plugin ui icons, choose from assets/fontello
+// plugin ui icon classes, choose from assets/fontello
 $config['plugin.contextmenu_folder.icon_mapa'] = array(
         'show_all' => 'folder-icon-globe-earth',
         'show_active' => 'folder-icon-wifi-bold',
@@ -44,8 +41,8 @@ $config['plugin.contextmenu_folder.icon_mapa'] = array(
         'folder_read_tree' => 'folder-icon-check-heavy',
         'reset_selected' => 'folder-icon-cancel-white',
         'reset_transient' => 'folder-icon-cancel-black',
-        'mark_selected' => 'folder-icon-heart-white',
-        'mark_transient' => 'folder-icon-clock-medium',
+        'mark_selected' => 'folder-mark-upper-left folder-icon-heart-white',
+        'mark_transient' => 'folder-mark-lower-left folder-icon-clock-medium',
 );
 
 // XXX no override
@@ -129,7 +126,9 @@ $config['plugin.contextmenu_folder.feature_choice'] = array(
 //        'transient_on_delete',
 //        'transient_on_rename', 
 //        'transient_on_locate',
-        'filter_on_mbox_mark_read', 
+        'filter_on_mbox_mark_read',
+        'render_selected',
+//        'render_transient',
 );
 
 // available select/options
@@ -142,6 +141,8 @@ $config['plugin.contextmenu_folder.feature_choice.list'] = array(
 //        'transient_on_rename', // track mailbox rename in transient
 //        'transient_on_locate', // track mailbox locate in transient
         'filter_on_mbox_mark_read', // apply filter after mark read of mbox or tree
+        'render_selected', // display 'mark_selected' icon on mailbox
+//        'render_transient', // display 'mark_transient' icon on mailbox
 );
 
 // templates for making contact folder derived from mail headers
@@ -231,7 +232,6 @@ $config['plugin.contextmenu_folder.settings_area_list'] = array(
 // expose these settings in user ui
 $config['plugin.contextmenu_folder.settings_text_list'] = array(
         // 'transient_expire_time', // TODO
-        // 'icon_class_selected',
 );
 
 ?>
