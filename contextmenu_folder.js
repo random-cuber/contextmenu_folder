@@ -121,11 +121,6 @@ function plugin_contextmenu_folder() {
 		}
 	}
 
-	// icon css
-	function icon_class_selected() {
-		return self.env('icon_class_selected');
-	}
-
 	// add/del folder css
 	this.mbox_mark = function mbox_mark(mbox, klaz, on) {
 		var html_li_a = self.mbox_html_li_a(mbox);
@@ -138,7 +133,7 @@ function plugin_contextmenu_folder() {
 
 	// add/del 'selected' folder css
 	this.mbox_mark_selected = function mbox_mark_selected(mbox, on) {
-		self.mbox_mark(mbox, icon_class_selected(), on);
+		self.mbox_mark(mbox, self.icon_mapa('mark_selected'), on);
 	}
 
 	// folder is marked with a class
@@ -148,7 +143,7 @@ function plugin_contextmenu_folder() {
 
 	// folder is marked as 'selected'
 	this.mbox_has_mark_selected = function mbox_has_mark_selected(mbox) {
-		return self.mbox_has_mark(mbox, icon_class_selected());
+		return self.mbox_has_mark(mbox, self.icon_mapa('mark_selected'));
 	}
 
 	// rcmail folder identity
@@ -425,6 +420,21 @@ function plugin_contextmenu_folder() {
 	this.ajax_folder_scan_tree = new self.ajax_core('folder_scan_tree', null,
 			make_folder_scan_tree);
 
+	// plugin ui icons
+	this.icon_mapa = function icon_mapa(name) {
+		return self.env('icon_mapa')[name];
+	}
+
+	// pupulate context menu item
+	this.menu_item = function menu_item(source, entry) {
+		source.push({
+			props : entry,
+			label : self.localize(entry),
+			command : self.key(entry),
+			classes : 'override ' + self.icon_mapa(entry),
+		});
+	}
+
 	// ui object
 	this.mbox_create = function mbox_create(mbox) {
 		var root = self.mbox_root(mbox);
@@ -616,7 +626,8 @@ function plugin_contextmenu_folder() {
 	}
 
 	// options builder
-	this.dialog_options = function(icon, func_open, func_close) {
+	this.dialog_options = function(icon_name, func_open, func_close) {
+		var icon = self.icon_mapa(icon_name);
 		return {
 			open : function open(event, ui) {
 				self.dialog_icon($(this).parent(), icon ? icon : '');
@@ -1075,7 +1086,7 @@ plugin_contextmenu_folder.prototype.contact_folder_create = function contact_fol
 		format_part.select(self.env('memento_contact_format_item'));
 	}
 
-	var options = self.dialog_options('folder-icon-folder-create', open);
+	var options = self.dialog_options('folder_create', open);
 
 	rcmail.show_popup_dialog(content, title, buttons, options);
 }
@@ -1144,7 +1155,7 @@ plugin_contextmenu_folder.prototype.folder_create = function folder_create() {
 		func : ajax.request,
 	});
 
-	var options = self.dialog_options('folder-icon-folder-create');
+	var options = self.dialog_options('folder_create');
 
 	rcmail.show_popup_dialog(content, title, buttons, options);
 }
@@ -1220,7 +1231,7 @@ plugin_contextmenu_folder.prototype.folder_delete = function folder_delete() {
 		render();
 	}
 
-	var options = self.dialog_options('folder-icon-folder-delete', open);
+	var options = self.dialog_options('folder_delete', open);
 
 	rcmail.show_popup_dialog(content, title, buttons, options);
 }
@@ -1298,7 +1309,7 @@ plugin_contextmenu_folder.prototype.folder_rename = function folder_rename() {
 		render();
 	}
 
-	var options = self.dialog_options('folder-icon-folder-rename', open);
+	var options = self.dialog_options('folder_rename', open);
 
 	rcmail.show_popup_dialog(content, title, buttons, options);
 }
@@ -1344,7 +1355,7 @@ plugin_contextmenu_folder.prototype.folder_locate = function folder_locate() {
 		self.save_pref('memento_folder_locate_text', $('#source').val());
 	}
 
-	var options = self.dialog_options('folder-icon-folder-locate', open, close);
+	var options = self.dialog_options('folder_locate', open, close);
 
 	rcmail.show_popup_dialog(content, title, buttons, options);
 }
@@ -1487,7 +1498,7 @@ plugin_contextmenu_folder.prototype.folder_scan_tree = function folder_scan_tree
 		func : post_ajax,
 	});
 
-	var options = self.dialog_options('folder-icon-folder-read-tree');
+	var options = self.dialog_options('folder_read_tree');
 
 	rcmail.show_popup_dialog(content, title, buttons, options);
 
@@ -1517,7 +1528,8 @@ plugin_contextmenu_folder.prototype.reset_collect = function reset_collect(
 	var source = rcmail.env.context_menu_source_id;
 	var target = rcmail.env.mailbox;
 
-	var title = self.localize('reset_' + props);
+	var mode = 'reset_' + props;
+	var title = self.localize(mode);
 	var collect = 'collect_' + props;
 
 	var source_input = $('<input>').prop({
@@ -1603,7 +1615,7 @@ plugin_contextmenu_folder.prototype.reset_collect = function reset_collect(
 		}
 	}
 
-	var options = self.dialog_options('folder-icon-cancel-black', open, close);
+	var options = self.dialog_options(mode, open, close);
 
 	rcmail.show_popup_dialog(content, title, buttons, options);
 
@@ -1730,7 +1742,7 @@ plugin_contextmenu_folder.prototype.message_transfer = function message_transfer
 		self.save_pref('memento_folder_locate_text', $('#source').val());
 	}
 
-	var options = self.dialog_options('folder-icon-folder-locate', open, close);
+	var options = self.dialog_options('folder_locate', open, close);
 
 	rcmail.show_popup_dialog(content, title, buttons, options);
 }
@@ -1753,14 +1765,8 @@ plugin_contextmenu_folder.prototype.mbox_list_control_menu = function mbox_list_
 		href : '#',
 	})
 
-	var icon_mapa = {
-		show_all : 'folder-icon-show-all',
-		show_active : 'folder-icon-show-active',
-		show_favorite : 'folder-icon-show-favorite',
-	}
-
 	var content = $('<span>').attr({
-		class : icon_mapa[show_mode],
+		class : self.icon_mapa(show_mode),
 	}).appendTo(status);
 
 	var menu_id = self.key('status_menu_id');
@@ -1773,36 +1779,11 @@ plugin_contextmenu_folder.prototype.mbox_list_control_menu = function mbox_list_
 
 	var menu_source = [ menu_id ];
 
-	menu_source.push({
-		label : self.localize('show_all'),
-		command : self.key('show_all'),
-		props : '',
-		classes : 'override ' + icon_mapa['show_all'],
-	});
-	menu_source.push({
-		label : self.localize('show_active'),
-		command : self.key('show_active'),
-		props : '',
-		classes : 'override ' + icon_mapa['show_active'],
-	});
-	menu_source.push({
-		label : self.localize('show_favorite'),
-		command : self.key('show_favorite'),
-		props : '',
-		classes : 'override ' + icon_mapa['show_favorite'],
-	});
-	menu_source.push({
-		label : self.localize('reset_selected'),
-		command : self.key('reset_selected'),
-		props : '',
-		classes : 'override folder-icon-cancel-white'
-	});
-	menu_source.push({
-		label : self.localize('reset_transient'),
-		command : self.key('reset_transient'),
-		props : '',
-		classes : 'override folder-icon-cancel-black'
-	});
+	self.menu_item(menu_source, 'show_all');
+	self.menu_item(menu_source, 'show_active');
+	self.menu_item(menu_source, 'show_favorite');
+	self.menu_item(menu_source, 'reset_selected');
+	self.menu_item(menu_source, 'reset_transient');
 
 	menu_source.push({
 		label : self.localize('folder_expand_all'),
@@ -1817,12 +1798,7 @@ plugin_contextmenu_folder.prototype.mbox_list_control_menu = function mbox_list_
 		classes : 'collapseall'
 	});
 
-	menu_source.push({
-		label : self.localize('folder_locate'),
-		command : self.key('folder_locate'),
-		props : '',
-		classes : 'override folder-icon-folder-locate'
-	});
+	self.menu_item(menu_source, 'folder_locate');
 
 	var menu = rcm_callbackmenu_init({ // plugin:contextmenu
 		menu_name : menu_name,
@@ -1836,7 +1812,7 @@ plugin_contextmenu_folder.prototype.mbox_list_control_menu = function mbox_list_
 	status.on('show_mode', function(event) {
 		var show_mode = self.env('show_mode');
 		content.attr({
-			class : icon_mapa[show_mode],
+			class : self.icon_mapa(show_mode),
 		});
 	});
 
@@ -1869,43 +1845,13 @@ plugin_contextmenu_folder.prototype.mbox_list_context_menu = function mbox_list_
 		menu.menu_source = [ menu.menu_source ];
 	}
 
-	menu.menu_source.push({
-		label : self.localize('folder_select'),
-		command : self.key('folder_select'),
-		props : '',
-		classes : 'override folder-icon-thumbs-up'
-	});
-	menu.menu_source.push({
-		label : self.localize('folder_unselect'),
-		command : self.key('folder_unselect'),
-		props : '',
-		classes : 'override folder-icon-thumbs-down'
-	});
-	menu.menu_source.push({
-		label : self.localize('folder_create'),
-		command : self.key('folder_create'),
-		props : '',
-		classes : 'override folder-icon-folder-create',
-	});
-	menu.menu_source.push({
-		label : self.localize('folder_delete'),
-		command : self.key('folder_delete'),
-		props : '',
-		classes : 'override folder-icon-folder-delete',
-	});
-	menu.menu_source.push({
-		label : self.localize('folder_rename'),
-		command : self.key('folder_rename'),
-		props : '',
-		classes : 'override folder-icon-folder-rename',
-	});
-
-	menu.menu_source.push({
-		label : self.localize('folder_read_tree'),
-		command : self.key('folder_read_tree'),
-		props : '',
-		classes : 'override folder-icon-folder-read-tree',
-	});
+	var menu_source = menu.menu_source;
+	self.menu_item(menu_source, 'folder_select');
+	self.menu_item(menu_source, 'folder_unselect');
+	self.menu_item(menu_source, 'folder_create');
+	self.menu_item(menu_source, 'folder_delete');
+	self.menu_item(menu_source, 'folder_rename');
+	self.menu_item(menu_source, 'folder_read_tree');
 
 	menu.addEventListener('activate', function activate(args) {
 		var source = rcmail.env.context_menu_source_id;
@@ -1957,8 +1903,9 @@ plugin_contextmenu_folder.prototype.mesg_list_context_menu = function mesg_list_
 		label : self.localize('folder_create'),
 		command : self.key('contact_folder_create'),
 		props : '',
-		classes : 'override folder-icon-folder-create',
+		classes : 'override ' + self.icon_mapa('folder_create'),
 	});
+
 	menu.menu_source.push({
 		label : self.localize('message_copy'),
 		command : self.key('message_copy'),

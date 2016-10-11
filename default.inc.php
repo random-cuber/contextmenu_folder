@@ -17,17 +17,36 @@ $config['plugin.contextmenu_folder.enable_refresh'] = false; // TODO
 // apply mailbox filter on server vs on client
 $config['plugin.contextmenu_folder.enable_client_filter'] = true;
 
-// actiate plugin context popup menu on mailbox list elemenets 
+// activate plugin context popup menu on mailbox list elemenets 
 $config['plugin.contextmenu_folder.enable_folder_list_context_menu'] = true;
 
-// actiate plugin control popup menu on mailbox list footer tool box
+// activate plugin control popup menu on mailbox list footer tool box
 $config['plugin.contextmenu_folder.enable_folder_list_control_menu'] = true;
 
-// actiate 'create contact folder form email address' feature
+// activate 'create contact folder form email address' feature
 $config['plugin.contextmenu_folder.enable_message_list_context_menu'] = true;
 
 // 'selected' folder icon, choose from assets/fontello
 $config['plugin.contextmenu_folder.icon_class_selected'] = 'folder-icon-heart-white';
+
+// plugin ui icons, choose from assets/fontello
+$config['plugin.contextmenu_folder.icon_mapa'] = array(
+        'show_all' => 'folder-icon-globe-earth',
+        'show_active' => 'folder-icon-wifi-bold',
+        'show_favorite' => 'folder-icon-heart-black',
+        'folder_select' => 'folder-icon-thumbs-up-1',
+        'folder_unselect' => 'folder-icon-thumbs-down-1',
+        'contact_folder_create' => 'folder-icon-folder-create',
+        'folder_create' => 'folder-icon-folder-plus',
+        'folder_delete' => 'folder-icon-folder-minus',
+        'folder_rename' => 'folder-icon-pencil-tip',
+        'folder_locate' => 'folder-icon-search-large',
+        'folder_read_tree' => 'folder-icon-check-heavy',
+        'reset_selected' => 'folder-icon-cancel-white',
+        'reset_transient' => 'folder-icon-cancel-black',
+        'mark_selected' => 'folder-icon-heart-white',
+        'mark_transient' => 'folder-icon-clock-medium',
+);
 
 // XXX no override
 // avilable mailbox filter options
@@ -125,7 +144,7 @@ $config['plugin.contextmenu_folder.feature_choice.list'] = array(
         'filter_on_mbox_mark_read', // apply filter after mark read of mbox or tree
 );
 
-// rules for making contact folder derived from mail headers
+// templates for making contact folder derived from mail headers
 $config['plugin.contextmenu_folder.contact_folder_format_list'] = array(
         
         '{parent}/{full_name} @{domain}',
@@ -181,7 +200,7 @@ $config['plugin.contextmenu_folder.domain_country_list'] = array(
 "ve","vg","vi","vn","vu","wf","ws","ye","yt","yu","za","zm","zr","zw",
 );
 
-////////
+//////// settings
 
 // expose these settings in user ui
 $config['plugin.contextmenu_folder.settings_checkbox_list'] = array(

@@ -40,9 +40,9 @@ class contextmenu_folder extends rcube_plugin {
         'enable_message_list_context_menu', 
         'filter_active',
         'filter_favorite',
-        'icon_class_selected',
         'contact_folder_format_list',
         'feature_choice',
+        'icon_mapa',
     );
     
     // plugin ajax registered actions
