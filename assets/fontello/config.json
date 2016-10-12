@@ -305,6 +305,30 @@
       "css": "wifi-tower",
       "code": 59429,
       "src": "modernpics"
+    },
+    {
+      "uid": "a6267a0b7262e1deffcc83076bc0e197",
+      "css": "trash-wire",
+      "code": 61571,
+      "src": "mfglabs"
+    },
+    {
+      "uid": "2626e3a1bbcd90e45849af3b58a1d594",
+      "css": "trash-can-iso",
+      "code": 59430,
+      "src": "entypo"
+    },
+    {
+      "uid": "aa0d9175a3919a260a4012d560e9f01e",
+      "css": "right-hand",
+      "code": 59431,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "3d99d345645f43e31e9e0fd48be37e9c",
+      "css": "left-hand",
+      "code": 59432,
+      "src": "fontawesome"
     }
   ]
 }

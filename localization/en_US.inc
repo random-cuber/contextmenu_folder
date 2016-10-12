@@ -11,6 +11,8 @@ $labels['folder_delete'] = 'Delete folder';
 $labels['folder_rename'] = 'Rename folder';
 $labels['folder_locate'] = 'Locate folder';
 
+$labels['folder_purge'] = 'Purge folder';
+
 $labels['folder_read_this'] = 'Folder mark read';
 $labels['folder_read_tree'] = 'Folder tree read';
 

@@ -56,6 +56,7 @@ class contextmenu_folder extends rcube_plugin {
         'folder_delete',
         'folder_locate',
         'folder_rename',
+        'folder_purge',
         'folder_select',
         'folder_scan_tree',
     );
@@ -637,7 +638,7 @@ class contextmenu_folder extends rcube_plugin {
           
         $source = $this->input_value('source');
         $target = $this->input_value('target');
-            $result = $storage->rename_folder($source, $target);
+        $result = $storage->rename_folder($source, $target);
         if ($result) {
             $this->folder_transient_unset($source);
             $this->folder_transient_set($target);
@@ -646,6 +647,45 @@ class contextmenu_folder extends rcube_plugin {
         } else {
             $this->rc->display_server_error('error folder_rename');
         }
+    }
+    
+    // XXX see steps/mail/folders.inc
+    function folder_reset($RCMAIL, $OUTPUT, $mbox) {
+        $trash_mbox   = $RCMAIL->config->get('trash_mbox');
+        //
+        $OUTPUT->show_message('folderpurged', 'confirmation');
+        if (!empty($_REQUEST['_reload'])) {
+            $OUTPUT->set_env('messagecount', 0);
+            $OUTPUT->set_env('pagecount', 0);
+            $OUTPUT->set_env('exists', 0);
+            $OUTPUT->command('message_list.clear');
+            $OUTPUT->command('set_rowcount', rcmail_get_messagecount_text(), $mbox);
+            $OUTPUT->command('set_unread_count', $mbox, 0);
+            $OUTPUT->command('set_quota', $RCMAIL->quota_content(null, $mbox));
+            rcmail_set_unseen_count($mbox, 0);
+            if ($mbox === $trash_mbox) {
+                $OUTPUT->command('set_trash_count', 0);
+            }
+        }
+    }
+
+    // empty imap folder of all messages
+    public function action_folder_purge() {
+        $output = $this->rc->output;
+        $storage = $this->rc->storage;
+        
+        $source = $this->input_value('source');
+        $target = $this->input_value('target');
+        $result = $storage->clear_folder($target);
+        if ($result) {
+            // $this->folder_reset($this->rc, $output, $target);
+            $output->show_message('folderpurged', 'confirmation');
+        } else {
+            $this->rc->display_server_error('error folder_purge');
+        }
+        
+        $output->command($this->key('folder_purge'), array());
+        $output->send();
     }
 
     // switch ui to provided mailbox 

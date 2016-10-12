@@ -37,9 +37,13 @@
 .folder-icon-updown-circle:before { content: '\e823'; } /* '' */
 .folder-icon-wifi-outline:before { content: '\e824'; } /* '' */
 .folder-icon-wifi-tower:before { content: '\e825'; } /* '' */
+.folder-icon-trash-can-iso:before { content: '\e826'; } /* '' */
+.folder-icon-right-hand:before { content: '\e827'; } /* '' */
+.folder-icon-left-hand:before { content: '\e828'; } /* '' */
 .folder-icon-heart-broken:before { content: '\f028'; } /* '' */
 .folder-icon-move:before { content: '\f047'; } /* '' */
 .folder-icon-folder-open:before { content: '\f068'; } /* '' */
+.folder-icon-trash-wire:before { content: '\f083'; } /* '' */
 .folder-icon-rss:before { content: '\f09e'; } /* '' */
 .folder-icon-docs:before { content: '\f0c5'; } /* '' */
 .folder-icon-folder-open-wide:before { content: '\f115'; } /* '' */

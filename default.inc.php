@@ -33,14 +33,15 @@ $config['plugin.contextmenu_folder.icon_mapa'] = array(
         'show_favorite' => 'folder-icon-heart-black',
         'folder_select' => 'folder-icon-thumbs-up-1',
         'folder_unselect' => 'folder-icon-thumbs-down-1',
-        'contact_folder_create' => 'folder-icon-folder-create',
+        // 'folder_clean' => 'folder-icon-trash-wire',
         'folder_create' => 'folder-icon-folder-plus',
         'folder_delete' => 'folder-icon-folder-minus',
         'folder_rename' => 'folder-icon-pencil-tip',
         'folder_locate' => 'folder-icon-search-large',
+        'folder_purge' => 'folder-icon-trash-can-iso',
         'folder_read_tree' => 'folder-icon-check-heavy',
-        'reset_selected' => 'folder-icon-cancel-white',
-        'reset_transient' => 'folder-icon-cancel-black',
+        'reset_selected' => 'folder-icon-right-hand',
+        'reset_transient' => 'folder-icon-clock-heavy',
         'mark_selected' => 'folder-mark-upper-left folder-icon-heart-white',
         'mark_transient' => 'folder-mark-lower-left folder-icon-clock-medium',
 );
@@ -122,13 +123,18 @@ $config['plugin.contextmenu_folder.feature_choice'] = array(
         'remember_filter',
         'remember_mailbox',
         'remember_message',
-//        'transient_on_create',
-//        'transient_on_delete',
-//        'transient_on_rename', 
-//        'transient_on_locate',
+        'track_on_create',
+        'track_on_delete',
+        'track_on_rename', 
+        'track_on_locate',
         'filter_on_mbox_mark_read',
         'render_selected',
 //        'render_transient',
+        'replace_menu_purge',
+        // 'allow_purge_any',
+        // 'allow_purge_junk',
+        'allow_purge_trash',
+        // 'hide_mailboxmenulink',
 );
 
 // available select/options
@@ -136,13 +142,18 @@ $config['plugin.contextmenu_folder.feature_choice.list'] = array(
         'remember_filter', // restore filter on session load
         'remember_mailbox', // restore last selected mailbox
         'remember_message', // restore last selected message
-//        'transient_on_create', // track mailbox create in transient
-//        'transient_on_delete', // track mailbox delete in transient
-//        'transient_on_rename', // track mailbox rename in transient
-//        'transient_on_locate', // track mailbox locate in transient
+        'track_on_create', // track mailbox create in transient
+        'track_on_delete', // track mailbox delete in transient
+        'track_on_rename', // track mailbox rename in transient
+        'track_on_locate', // track mailbox locate in transient
         'filter_on_mbox_mark_read', // apply filter after mark read of mbox or tree
         'render_selected', // display 'mark_selected' icon on mailbox
 //        'render_transient', // display 'mark_transient' icon on mailbox
+        'replace_menu_purge', // override 'empty/purge' context menu command
+        'allow_purge_any', // permit to discard messages from any folder
+        'allow_purge_junk', // permit to discard messages only form 'junk'
+        'allow_purge_trash', // permit to discard messages only form 'trash'
+        'hide_mailboxmenulink', // remove default mailbox list footer button
 );
 
 // templates for making contact folder derived from mail headers
