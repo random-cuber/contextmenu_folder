@@ -43,6 +43,10 @@ class contextmenu_folder extends rcube_plugin {
         'contact_folder_format_list',
         'feature_choice',
         'icon_mapa',
+        'allow_purge_regex',
+        'hide_ctrl_menu_list',
+        'hide_mbox_menu_list',
+        'hide_mesg_menu_list',
     );
     
     // plugin ajax registered actions

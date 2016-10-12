@@ -674,10 +674,10 @@ function plugin_contextmenu_folder() {
 		self.log(name + '=' + (no_dump ? '...' : self.json_encode(value, 4)));
 	}
 
-	//
+	// verify purge command context
 	this.has_allow_purge = function has_allow_purge(mbox) {
 		if (self.has_feature('allow_purge_any')) {
-			self.log('all');
+			self.log('any');
 			return true;
 		}
 		if (self.has_feature('allow_purge_junk')) {
@@ -694,8 +694,38 @@ function plugin_contextmenu_folder() {
 				return true;
 			}
 		}
+		if (self.has_feature('allow_purge_regex')) {
+			var regex = self.env('allow_purge_regex');
+			if (mbox.match(regex)) {
+				self.log('regex');
+				return true;
+			}
+		}
 		self.log('none');
 		return false;
+	}
+
+	// apply action to jquery selector list
+	this.selector_action = function selector_action(action, list_name) {
+		var selector_list = self.env(list_name) || [];
+		$.each(selector_list, function selector_action$(_, selector) {
+			var element = $(selector);
+			self.log(action + ': ' + selector);
+			if (element.length) {
+				switch (action) {
+				case 'show':
+					element.show();
+					break;
+				case 'hide':
+					element.hide();
+					break;
+				default:
+					self.log('invalid action: ' + action, true);
+				}
+			} else {
+				self.log('invalid element: ' + selector, true);
+			}
+		});
 	}
 
 	// jquery dialog title icon
@@ -1962,8 +1992,8 @@ plugin_contextmenu_folder.prototype.mbox_list_control_menu = function mbox_list_
 
 	status.trigger('show_mode'); // render icon
 
-	var menu_id = self.key('status_menu_id');
-	var menu_name = self.key('status_menu_name');
+	var menu_id = self.key('status_src');
+	var menu_name = self.key('status_menu');
 
 	var source = $('<ul>').prop({
 		id : menu_id,
@@ -2015,6 +2045,16 @@ plugin_contextmenu_folder.prototype.mbox_list_control_menu = function mbox_list_
 		self.log('missing #mailboxmenulink', true);
 	}
 
+	menu.addEventListener('activate', function activate(args) {
+		//
+	});
+
+	menu.addEventListener('afteractivate', function afteractivate(args) {
+		if (self.has_feature('hide_ctrl_menu')) {
+			self.selector_action('hide', 'hide_ctrl_menu_list');
+		}
+	});
+
 }
 
 // menu setup
@@ -2044,7 +2084,7 @@ plugin_contextmenu_folder.prototype.mbox_list_context_menu = function mbox_list_
 
 	function replace_menu_purge(source) { // plugin:contextmenu
 		var allow = self.has_allow_purge(source);
-		var link = $('#rcm_folderlist a[class*=cmd_purge]');
+		var link = $('#rcm_folderlist a[class*="cmd_purge"]');
 		var classes = 'override ' + self.icon_mapa('folder_purge');
 		link.find('span:first').text(self.localize('folder_purge'));
 		link.addClass('replace_cmd_purge').removeClass('cmd_purge');
@@ -2090,6 +2130,13 @@ plugin_contextmenu_folder.prototype.mbox_list_context_menu = function mbox_list_
 			return replace_menu_purge(source);
 		}
 	});
+
+	menu.addEventListener('afteractivate', function afteractivate(args) {
+		if (self.has_feature('hide_mbox_menu')) {
+			self.selector_action('hide', 'hide_mbox_menu_list');
+		}
+	});
+
 }
 
 // menu setup
@@ -2127,6 +2174,16 @@ plugin_contextmenu_folder.prototype.mesg_list_context_menu = function mesg_list_
 		command : self.key('message_move'),
 		props : '',
 		classes : 'move movecontact', // FIXME css
+	});
+
+	menu.addEventListener('activate', function activate(args) {
+		//
+	});
+
+	menu.addEventListener('afteractivate', function afteractivate(args) {
+		if (self.has_feature('hide_mesg_menu')) {
+			self.selector_action('hide', 'hide_mesg_menu_list');
+		}
 	});
 
 }

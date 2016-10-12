@@ -134,7 +134,11 @@ $config['plugin.contextmenu_folder.feature_choice'] = array(
         // 'allow_purge_any',
         // 'allow_purge_junk',
         'allow_purge_trash',
+        // 'allow_purge_regex',
         // 'hide_mailboxmenulink',
+        // 'hide_ctrl_menu',
+        // 'hide_mbox_menu',
+        // 'hide_mesg_menu',
 );
 
 // available select/options
@@ -153,7 +157,32 @@ $config['plugin.contextmenu_folder.feature_choice.list'] = array(
         'allow_purge_any', // permit to discard messages from any folder
         'allow_purge_junk', // permit to discard messages only form 'junk'
         'allow_purge_trash', // permit to discard messages only form 'trash'
+        'allow_purge_regex', // permit to discard messages matched with regex
         'hide_mailboxmenulink', // remove default mailbox list footer button
+        'hide_ctrl_menu', // remove mailbox control menu items matched by selector
+        'hide_mbox_menu', // remove mailbox context menu items matched by selector
+        'hide_mesg_menu', // remove message context menu items matched by selector
+);
+
+// permit to discard messages matched with regex
+$config['plugin.contextmenu_folder.allow_purge_regex'] = '^Archive/Discard/.*$';
+
+// remove mailbox control menu items matched by selector, enabled by feature_choice:hide_ctrl_menu
+$config['plugin.contextmenu_folder.hide_ctrl_menu_list'] = array(
+        'div[id="rcm_plugin.contextmenu_folder.status_menu"] li:has(a[class*="folder_locate"])', // remove folder locate
+);
+
+// remove mailbox context menu items matched by selector, enabled by feature_choice:hide_mbox_menu
+$config['plugin.contextmenu_folder.hide_mbox_menu_list'] = array(
+        'div[id="rcm_folderlist"] li:has(a[class*="cmd_expunge"])', // remove mailbox compact
+        'div[id="rcm_folderlist"] li:has(a[class*="collapseall"])', // remove mailbox collapse
+        'div[id="rcm_folderlist"] li:has(a[class*="expandall"])', // remove mailbox expand
+);
+
+// remove message context menu items matched by selector, enabled by feature_choice:hide_mesg_menu
+$config['plugin.contextmenu_folder.hide_mesg_menu_list'] = array(
+        'div[id="rcm_messagemenu-menu"] li:has(a[class*="cmd_copy"])', // remove message copy via folder menu
+        'div[id="rcm_messagemenu-menu"] li:has(a[class*="cmd_move"])', // remove message move via folder menu
 );
 
 // templates for making contact folder derived from mail headers
@@ -238,6 +267,9 @@ $config['plugin.contextmenu_folder.settings_area_list'] = array(
         'contact_folder_format_list',
         // 'domain_generic_list',
         // 'domain_country_list',
+        // 'hide_ctrl_menu_list',
+        // 'hide_mbox_menu_list',
+        // 'hide_mesg_menu_list',
 );
 
 // expose these settings in user ui
