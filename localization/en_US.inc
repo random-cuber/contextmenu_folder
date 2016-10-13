@@ -78,4 +78,6 @@ $labels['filter_favorite'] = 'Filters in category "favorite"';
 $labels['predefined_list'] = 'Folders in "predefined" filter';
 $labels['contact_folder_format_list'] = 'Contact mailbox format templates';
 
+$labels['transient_expire_mins'] = 'Transient folder expiration time (mins)';
+
 ?>

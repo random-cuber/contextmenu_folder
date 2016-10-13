@@ -37,10 +37,9 @@ div.contextmenu.rcmmainmenu ul.iconized li a.override span.icon {
     padding-left: 0.2em;
 }
 
-
 /* larry: tree list */
 
-ul.treelist li a[class*="folder-mark-"]:before {
+ul.treelist li a span[class*="folder-mark"]:before {
     position: relative;
     font-size: 0.8em;
     opacity: 0.7;
@@ -49,12 +48,22 @@ ul.treelist li a[class*="folder-mark-"]:before {
     width: 0em;
 }
 
-ul.treelist li a[class*="folder-mark-upper-left"]:before {
+ul.treelist li a span[class*="folder-mark-upper-left"]:before {
+    top: -0.7em;
     left: -3.5em;
-    top: -0.5em;
 }
 
-ul.treelist li a[class*="folder-mark-lower-left"]:before {
-    left: -3.5em;
+ul.treelist li a span[class*="folder-mark-lower-left"]:before {
     top: +0.3em;
+    left: -3.4em;
+}
+
+ul.treelist li a span[class*="folder-mark-upper-right"]:before {
+    top: -0.7em;
+    left: -1.7em;
+}
+
+ul.treelist li a span[class*="folder-mark-lower-right"]:before {
+    top: +0.3em;
+    left: -1.6em;
 }

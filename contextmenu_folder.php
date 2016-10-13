@@ -47,6 +47,7 @@ class contextmenu_folder extends rcube_plugin {
         'hide_ctrl_menu_list',
         'hide_mbox_menu_list',
         'hide_mesg_menu_list',
+        'transient_expire_mins',
     );
     
     // plugin ajax registered actions
@@ -855,6 +856,11 @@ class contextmenu_folder extends rcube_plugin {
         return $this->config_get('settings_area_list');
     }
 
+    // settings exposed to user
+    function settings_text_list() {
+        return $this->config_get('settings_text_list');
+    }
+    
     // settings checkbox
     function build_checkbox(& $entry, $name) {
         $key = $this->key($name);
@@ -896,6 +902,18 @@ class contextmenu_folder extends rcube_plugin {
         );
     }
     
+    // settings single line text input
+    function build_text(& $entry, $name) {
+        $key = $this->key($name);
+        $input = new html_inputfield(array(
+             'id' => $key, 'name' => $key, 'value' => 1,
+        ));
+        $entry['options'][$name] = array(
+            'title' => html::label($key, $this->quoted($name)),
+            'content' => $input->show($this->config_get($name)),
+        );
+    }
+    
     // build settings ui
     function hook_preferences_list($args) {
         if ($this->is_plugin_section($args)) {
@@ -911,6 +929,9 @@ class contextmenu_folder extends rcube_plugin {
             }
             foreach($this->settings_area_list() as $name) {
                 $this->build_textarea($entry, $name);
+            }
+            foreach($this->settings_text_list() as $name) {
+                $this->build_text($entry, $name);
             }
         }
         return $args;
@@ -937,7 +958,13 @@ class contextmenu_folder extends rcube_plugin {
         // sort($value); // alpha sorted
         $prefs[$key] = $value;
     }
-  
+
+    // settings single line text input
+    function persist_text(& $prefs, $name) {
+        $key = $this->key($name); $value = $this->input_value($key);
+        $prefs[$key] = trim($value);
+    }
+    
     // persist user settings
     function hook_preferences_save($args) {
         if ($this->is_plugin_section($args)) {
@@ -951,6 +978,9 @@ class contextmenu_folder extends rcube_plugin {
             }
             foreach($this->settings_area_list() as $name) {
                 $this->persist_textarea($prefs, $name);
+            }
+            foreach($this->settings_text_list() as $name) {
+                $this->persist_text($prefs, $name);
             }
         }
         return $args;

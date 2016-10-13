@@ -41,9 +41,9 @@ $config['plugin.contextmenu_folder.icon_mapa'] = array(
         'folder_purge' => 'folder-icon-trash-can-iso',
         'folder_read_tree' => 'folder-icon-check-heavy',
         'reset_selected' => 'folder-icon-right-hand',
-        'reset_transient' => 'folder-icon-clock-heavy',
+        'reset_transient' => 'folder-icon-hour-white',
         'mark_selected' => 'folder-mark-upper-left folder-icon-heart-white',
-        'mark_transient' => 'folder-mark-lower-left folder-icon-clock-medium',
+        'mark_transient' => 'folder-mark-lower-left folder-icon-hour-white',
 );
 
 // XXX no override
@@ -86,28 +86,28 @@ $config['plugin.contextmenu_folder.predefined_list'] = array(
 
 // persisted mailboxes included in the 'special' filter type
 $config['plugin.contextmenu_folder.collect_special'] = array(
-        'default' => array(),
+        'default' => array( 'created_msec' => 0 ),
 );
 
 // persisted mailboxes included in the 'selected' filter type
 $config['plugin.contextmenu_folder.collect_selected'] = array(
-        'default' => array(),
+        'default' => array( 'created_msec' => 0 ),
 );
 
 // persisted mailboxes included in the 'transient' filter type
 $config['plugin.contextmenu_folder.collect_transient'] = array(
-        'default' => array(),
+        'default' => array( 'created_msec' => 0 ),
 );
 
 // persisted mailboxes included in the 'predefined' filter type
 $config['plugin.contextmenu_folder.collect_predefined'] = array(
-        'default' => array(),
+        'default' => array( 'created_msec' => 0 ),
 );
 
-// expiration time for auto reset of transient mailbox collection, minutes
-$config['plugin.contextmenu_folder.transient_expire_time'] = 100; // TODO
+// expiration time for auto remove of transient mailbox collection, minutes
+$config['plugin.contextmenu_folder.transient_expire_mins'] = 20;
 
-// current show mode
+// current filter
 $config['plugin.contextmenu_folder.show_mode'] = 'show_all';
 
 // client ui state 
@@ -129,7 +129,7 @@ $config['plugin.contextmenu_folder.feature_choice'] = array(
         'track_on_locate',
         'filter_on_mbox_mark_read',
         'render_selected',
-//        'render_transient',
+        'render_transient',
         'replace_menu_purge',
         // 'allow_purge_any',
         // 'allow_purge_junk',
@@ -139,6 +139,8 @@ $config['plugin.contextmenu_folder.feature_choice'] = array(
         // 'hide_ctrl_menu',
         // 'hide_mbox_menu',
         // 'hide_mesg_menu',
+        'expire_transient',
+        'filter_on_expire_transient',
 );
 
 // available select/options
@@ -146,13 +148,13 @@ $config['plugin.contextmenu_folder.feature_choice.list'] = array(
         'remember_filter', // restore filter on session load
         'remember_mailbox', // restore last selected mailbox
         'remember_message', // restore last selected message
-        'track_on_create', // track mailbox create in transient
-        'track_on_delete', // track mailbox delete in transient
-        'track_on_rename', // track mailbox rename in transient
-        'track_on_locate', // track mailbox locate in transient
+        'track_on_create', // track mailbox create in transient collection
+        'track_on_delete', // track mailbox delete in transient collection
+        'track_on_rename', // track mailbox rename in transient collection
+        'track_on_locate', // track mailbox locate in transient collection
         'filter_on_mbox_mark_read', // apply filter after mark read of mbox or tree
         'render_selected', // display 'mark_selected' icon on mailbox
-//        'render_transient', // display 'mark_transient' icon on mailbox
+        'render_transient', // display 'mark_transient' icon on mailbox
         'replace_menu_purge', // override 'empty/purge' context menu command
         'allow_purge_any', // permit to discard messages from any folder
         'allow_purge_junk', // permit to discard messages only form 'junk'
@@ -162,6 +164,8 @@ $config['plugin.contextmenu_folder.feature_choice.list'] = array(
         'hide_ctrl_menu', // remove mailbox control menu items matched by selector
         'hide_mbox_menu', // remove mailbox context menu items matched by selector
         'hide_mesg_menu', // remove message context menu items matched by selector
+        'expire_transient', // auto remove mailbox from transient collection 
+        'filter_on_expire_transient', // apply filter after transient mailbox expiration
 );
 
 // permit to discard messages matched with regex
@@ -274,7 +278,7 @@ $config['plugin.contextmenu_folder.settings_area_list'] = array(
 
 // expose these settings in user ui
 $config['plugin.contextmenu_folder.settings_text_list'] = array(
-        // 'transient_expire_time', // TODO
+       'transient_expire_mins',
 );
 
 ?>

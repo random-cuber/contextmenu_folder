@@ -68,6 +68,8 @@ Settings -> Preferences -> Mailbox View -> Folder Menu
 Menu entries:
 * `TODO` : TODO
 
+Available features are described in [plugin default config][default_config].
+
 Operation
 ---------
 
@@ -126,3 +128,5 @@ Menu entries:
 [folder_list_context_menu]:  https://raw.githubusercontent.com/random-cuber/contextmenu_folder/master/build/folder_list_context_menu.png
 [folder_list_control_menu]:  https://raw.githubusercontent.com/random-cuber/contextmenu_folder/master/build/folder_list_control_menu.png
 [message_list_context_menu]: https://raw.githubusercontent.com/random-cuber/contextmenu_folder/master/build/message_list_context_menu.png
+
+[default_config]: https://github.com/random-cuber/contextmenu_folder/blob/master/default.inc.php

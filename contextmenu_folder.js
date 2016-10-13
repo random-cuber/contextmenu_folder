@@ -83,6 +83,46 @@ function plugin_contextmenu_folder() {
 		return rcmail.env.delimiter;
 	}
 
+	// auto remove mailbox from transient collection
+	function make_expire_transient() {
+		self.log('...');
+		var expire_mins = self.env('transient_expire_mins');
+		var collect_transient = self.collect_transient();
+		var current_msec = (new Date()).getTime();
+		var minute_msec = 60 * 1000;
+		var has_change = false;
+		$.each(collect_transient, //
+		function make_expire_transient$(mbox, mbox_meta) {
+			var created_msec = mbox_meta.created_msec;
+			if (created_msec) {
+				var elapse_mins = (current_msec - created_msec) / minute_msec;
+				if (elapse_mins > expire_mins) {
+					self.log(mbox);
+					has_change = true;
+					delete collect_transient[mbox];
+					self.mbox_mark_transient(mbox, false);
+				}
+			}
+		});
+		if (has_change) {
+			self.save_pref('collect_transient', collect_transient);
+			if (self.has_feature('filter_on_expire_transient')) {
+				var filter_list = self.filter_list();
+				if (filter_list.indexOf('transient') >= 0) {
+					self.mbox_filter_apply();
+				}
+			}
+		}
+	}
+
+	// update ui
+	this.periodic_refresh = function periodic_refresh() {
+		self.log('...');
+		if (self.has_feature('expire_transient')) {
+			make_expire_transient();
+		}
+	}
+
 	// filters defined by show mode
 	this.filter_list = function filter_list(show_mode) {
 		var show_mode = show_mode ? show_mode : self.env('show_mode');
@@ -165,12 +205,33 @@ function plugin_contextmenu_folder() {
 		}
 	}
 
+	// add/rem folder css
+	this.mbox_mark_span = function mbox_mark_span(mbox, name, on) {
+		var html_li_a = self.mbox_html_li_a(mbox);
+		var span = html_li_a.find('span[class*="' + name + '"]');
+		if (span.length == 0) {
+			span = $('<span>').attr('class', name).prependTo(html_li_a);
+		}
+		var klaz = self.icon_mapa(name); // keep name
+		if (on) {
+			span.addClass(klaz);
+		} else {
+			span.removeClass(klaz);
+		}
+	}
+
 	// add/rem 'selected' folder css
 	this.mbox_mark_selected = function mbox_mark_selected(mbox, on) {
-		if (!self.has_feature('render_selected')) {
-			return;
+		if (self.has_feature('render_selected')) {
+			self.mbox_mark_span(mbox, 'mark_selected', on);
 		}
-		self.mbox_mark(mbox, self.icon_mapa('mark_selected'), on);
+	}
+
+	// add/rem 'transient' folder css
+	this.mbox_mark_transient = function mbox_mark_transient(mbox, on) {
+		if (self.has_feature('render_transient')) {
+			self.mbox_mark_span(mbox, 'mark_transient', on);
+		}
 	}
 
 	// rcmail folder identity
@@ -248,12 +309,21 @@ function plugin_contextmenu_folder() {
 		});
 	}
 
-	// paint folders form 'selected' collection
+	// paint folders from 'selected' collection
 	this.mbox_render_selected = function mbox_render_selected(on) {
 		var collect_selected = self.collect_selected();
 		var mbox_list = Object.keys(collect_selected).sort();
 		$.each(mbox_list, function(_, mbox) {
 			self.mbox_mark_selected(mbox, on);
+		});
+	}
+
+	// paint folders from 'transient' collection
+	this.mbox_render_transient = function mbox_render_transient(on) {
+		var collect_transient = self.collect_transient();
+		var mbox_list = Object.keys(collect_transient).sort();
+		$.each(mbox_list, function(_, mbox) {
+			self.mbox_mark_transient(mbox, on);
 		});
 	}
 
@@ -528,13 +598,23 @@ function plugin_contextmenu_folder() {
 		self.track_on_delete(mbox);
 	}
 
+	// mailbox descriptor in collection
+	this.mbox_meta = function mbox_meta(mbox, action) {
+		return {
+			mbox : mbox,
+			action : action,
+			created_msec : (new Date()).getTime(),
+		}
+	}
+
 	// transient collection
 	this.track_on_create = function track_on_create(mbox) {
 		var track = self.has_feature('track_on_create')
 				|| self.has_feature('track_on_rename');
 		if (track) {
+			self.mbox_mark_transient(mbox, true);
 			var collect_transient = self.collect_transient();
-			collect_transient[mbox] = mbox;
+			collect_transient[mbox] = self.mbox_meta(mbox, 'create');
 			self.save_pref('collect_transient', collect_transient);
 		}
 	}
@@ -544,6 +624,7 @@ function plugin_contextmenu_folder() {
 		var track = self.has_feature('track_on_delete')
 				|| self.has_feature('track_on_rename');
 		if (track) {
+			self.mbox_mark_transient(mbox, false);
 			var collect_transient = self.collect_transient();
 			object_delete(collect_transient, mbox_tree_regex(mbox));
 			self.save_pref('collect_transient', collect_transient);
@@ -554,8 +635,9 @@ function plugin_contextmenu_folder() {
 	this.track_on_locate = function track_on_locate(mbox) {
 		var track = self.has_feature('track_on_locate');
 		if (track) {
+			self.mbox_mark_transient(mbox, true);
 			var collect_transient = self.collect_transient();
-			collect_transient[mbox] = mbox;
+			collect_transient[mbox] = self.mbox_meta(mbox, 'locate');
 			self.save_pref('collect_transient', collect_transient);
 		}
 	}
@@ -971,6 +1053,7 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 	self.register_command_list();
 
 	self.mbox_render_selected(true);
+	self.mbox_render_transient(true);
 
 	window.setTimeout(function init_model() {
 		self.log('...');
@@ -1000,6 +1083,9 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 	} else {
 		// noop
 	}
+
+	var minute_msec = 60 * 1000;
+	window.setInterval(self.periodic_refresh, minute_msec);
 
 }
 
@@ -1542,7 +1628,7 @@ plugin_contextmenu_folder.prototype.folder_change_select = function folder_chang
 		var collect_selected = self.collect_selected();
 		switch (mode) {
 		case 'folder_select':
-			collect_selected[source] = source;
+			collect_selected[source] = self.mbox_meta(source, 'select');
 			self.mbox_mark_selected(source, true);
 			break;
 		case 'folder_unselect':
@@ -1717,6 +1803,9 @@ plugin_contextmenu_folder.prototype.reset_collect = function reset_collect(
 			function request() {
 				if (collect == 'collect_selected') {
 					self.mbox_render_selected(false);
+				}
+				if (collect == 'collect_transient') {
+					self.mbox_render_transient(false);
 				}
 				if (self.is_client_filter()) {
 					self.mbox_reset_collect(collect);
