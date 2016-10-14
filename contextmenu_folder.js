@@ -2064,32 +2064,35 @@ plugin_contextmenu_folder.prototype.mbox_list_control_menu = function mbox_list_
 		return;
 	}
 
-	var status = $('<a>').prop({
+	// default footer button
+	var menu_link = $('#mailboxmenulink');
+	if (!menu_link.length) {
+		self.log('missing menu_link', true);
+		return;
+	}
+
+	// plugin control button
+	var ctrl_link = $('<a>').prop({
 		id : self.status_id,
 		title : self.localize('status_title'),
 		href : '#',
 	})
 
-	var content = $('<span>').appendTo(status);
+	// icon render target
+	var ctrl_span = $('<span>').appendTo(ctrl_link);
 
-	status.on('show_mode', function(event) {
+	// display status icon
+	ctrl_link.on('show_mode', function render_icon(event) {
 		var show_mode = self.env('show_mode');
-		content.attr({
-			class : self.icon_mapa(show_mode),
-		});
+		ctrl_span.attr('class', self.icon_mapa(show_mode));
 	});
 
-	status.trigger('show_mode'); // render icon
+	ctrl_link.trigger('show_mode');
 
-	var menu_id = self.key('status_src');
+	var menu_src = self.key('status_src');
 	var menu_name = self.key('status_menu');
 
-	var source = $('<ul>').prop({
-		id : menu_id,
-		style : 'display: none; visibility: hidden;',
-	});
-
-	var menu_source = [ menu_id ];
+	var menu_source = [ menu_src ];
 
 	self.menu_item(menu_source, 'show_all');
 	self.menu_item(menu_source, 'show_active');
@@ -2112,26 +2115,38 @@ plugin_contextmenu_folder.prototype.mbox_list_control_menu = function mbox_list_
 
 	self.menu_item(menu_source, 'folder_locate');
 
-	var menu = rcm_callbackmenu_init({ // plugin:contextmenu
+	// plugin:contextmenu
+	var menu = rcm_callbackmenu_init({
 		menu_name : menu_name,
 		menu_source : menu_source,
 	});
 
-	status.on('click contextmenu', function(event) {
-		rcm_show_menu(event, this, null, menu); // plugin:contextmenu
-	});
+	// plugin:contextmenu
+	ctrl_link[0].onclick = function show_menu(event) {
+		rcm_show_menu(event, this, null, menu);
+	};
 
-	var mailboxmenulink = $('#mailboxmenulink'); // template:
-	if (mailboxmenulink.length) {
-		status.attr('role', mailboxmenulink.attr('role'));
-		status.attr('class', mailboxmenulink.attr('class'));
-		mailboxmenulink.after(status);
-		mailboxmenulink.after(source);
-		if (self.has_feature('hide_mailboxmenulink')) {
-			mailboxmenulink.hide();
-		}
-	} else {
-		self.log('missing #mailboxmenulink', true);
+	// mimic default button
+	ctrl_link.attr('role', menu_link.attr('role'));
+	ctrl_link.attr('class', menu_link.attr('class'));
+
+	// place control after default
+	ctrl_link.insertAfter(menu_link);
+
+	if (self.has_feature('hide_menu_link')) {
+		menu_link.hide();
+	}
+
+	if (self.has_feature('footer_contextmenu')) {
+		var link_list = menu_link.siblings().addBack().filter('a');
+		$.each(link_list, function footer_contextmenu$(_, link) {
+			var onclick = link.onclick;
+			var oncontextmenu = link.oncontextmenu;
+			if (onclick && !oncontextmenu) {
+				self.log(link.id);
+				link.oncontextmenu = onclick;
+			}
+		});
 	}
 
 	menu.addEventListener('activate', function activate(args) {

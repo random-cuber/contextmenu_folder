@@ -135,12 +135,13 @@ $config['plugin.contextmenu_folder.feature_choice'] = array(
         // 'allow_purge_junk',
         'allow_purge_trash',
         // 'allow_purge_regex',
-        // 'hide_mailboxmenulink',
+        // 'hide_menu_link',
         // 'hide_ctrl_menu',
         // 'hide_mbox_menu',
         // 'hide_mesg_menu',
         'expire_transient',
         'filter_on_expire_transient',
+        'footer_contextmenu',
 );
 
 // available select/options
@@ -160,12 +161,13 @@ $config['plugin.contextmenu_folder.feature_choice.list'] = array(
         'allow_purge_junk', // permit to discard messages only form 'junk'
         'allow_purge_trash', // permit to discard messages only form 'trash'
         'allow_purge_regex', // permit to discard messages matched with regex
-        'hide_mailboxmenulink', // remove default mailbox list footer button
+        'hide_menu_link', // remove default mailbox list footer button
         'hide_ctrl_menu', // remove mailbox control menu items matched by selector
         'hide_mbox_menu', // remove mailbox context menu items matched by selector
         'hide_mesg_menu', // remove message context menu items matched by selector
         'expire_transient', // auto remove mailbox from transient collection 
         'filter_on_expire_transient', // apply filter after transient mailbox expiration
+        'footer_contextmenu', // enable mouse 'contextmenu' for all mbox list footer buttons
 );
 
 // permit to discard messages matched with regex
