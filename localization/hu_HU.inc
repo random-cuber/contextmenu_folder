@@ -63,7 +63,6 @@ $labels['activate_plugin'] = 'Kiegészítő aktiválása';
 
 $labels['enable_logging'] = 'Kiegészítő naplózás';
 $labels['enable_refresh'] = 'Mappa struktúra frissítése';
-$labels['enable_client_filter'] = 'Enable filter on client';
 $labels['enable_folder_list_context_menu'] = 'Üzenetablak jobbgombos menü';
 $labels['enable_folder_list_control_menu'] = 'Mappalista kiegészítő menü';
 $labels['enable_message_list_context_menu'] = 'Mappalista jobbgombos menü';

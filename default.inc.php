@@ -14,9 +14,6 @@ $config['plugin.contextmenu_folder.enable_logging'] = true;
 // periodic background folder list refresh
 $config['plugin.contextmenu_folder.enable_refresh'] = false; // TODO
 
-// apply mailbox filter on server vs on client
-$config['plugin.contextmenu_folder.enable_client_filter'] = true;
-
 // activate plugin context popup menu on mailbox list elemenets 
 $config['plugin.contextmenu_folder.enable_folder_list_context_menu'] = true;
 
@@ -254,7 +251,6 @@ $config['plugin.contextmenu_folder.settings_checkbox_list'] = array(
         'activate_plugin',
         'enable_logging', 
         // 'enable_refresh', // TODO 
-        // 'enable_client_filter',
         'enable_folder_list_context_menu', 
         'enable_folder_list_control_menu',
         'enable_message_list_context_menu',

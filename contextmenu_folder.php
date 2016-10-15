@@ -32,12 +32,11 @@ class contextmenu_folder extends rcube_plugin {
     // client environment variables, push only
     private static $environ_names = array(
         'activate_plugin',
-        'enable_logging', 
-        'enable_refresh', 
-        'enable_client_filter',
-        'enable_folder_list_context_menu', 
-        'enable_folder_list_control_menu', 
-        'enable_message_list_context_menu', 
+        'enable_logging',
+        'enable_refresh',
+        'enable_folder_list_context_menu',
+        'enable_folder_list_control_menu',
+        'enable_message_list_context_menu',
         'filter_active',
         'filter_favorite',
         'contact_folder_format_list',
@@ -52,17 +51,12 @@ class contextmenu_folder extends rcube_plugin {
     
     // plugin ajax registered actions
     private static $action_names = array(
-        'show_mode',
-        'collect_list',
-        'collect_reset',
         'header_list',
         'folder_list',
         'folder_create',
         'folder_delete',
-        'folder_locate',
         'folder_rename',
         'folder_purge',
-        'folder_select',
         'folder_scan_tree',
     );
 
@@ -105,6 +99,7 @@ class contextmenu_folder extends rcube_plugin {
                 $this->init_mail_html_page();
                 return;
             }
+            return;
         }
         if ($task == 'settings') {
             $this->init_config();
@@ -186,7 +181,6 @@ class contextmenu_folder extends rcube_plugin {
     // mail
     function init_mail_hook() {
         $this->add_hook('refresh', array($this, 'hook_refresh'));
-        $this->add_hook('render_mailboxlist', array($this, 'hook_render_mailboxlist'));
         $this->add_hook('preferences_update', array($this, 'hook_preferences_update'));
     }
     
@@ -255,11 +249,6 @@ class contextmenu_folder extends rcube_plugin {
         return isset($_REQUEST['_framed']);
     }
     
-    // apply mailbox filter on server vs on client
-    function is_client_filter(){
-        return $this->config_get('enable_client_filter');
-    }
-
     // build list of imap special mailbox names
     function special_folder_list() {
         $storage = $this->rc->get_storage();
@@ -270,22 +259,34 @@ class contextmenu_folder extends rcube_plugin {
         return $folder_list;
     }
     
-    // 
-    function provide_collect_special() {
-        $mbox_list = $this->special_folder_list();
-        $this->config_put('collect_special', array());
-        foreach($mbox_list as $mbox) {
-            $this->folder_collect_set('collect_special', $mbox);
-        }
+    // mailbox descriptor in collection
+    function mbox_meta($mbox = 'default', $action = 'default', $created_msec = 0) {
+        $meta_info = array(
+            'mbox' => $mbox,
+            'action' => $action,
+            'created_msec' => $created_msec,
+        );
+        return $meta_info;
     }
     
-    // rebuild predefined mailbox collection from the configuration
-    function provide_collect_predefined() {
-        $mbox_list = $this->config_get('predefined_list');
-        $this->config_put('collect_predefined', array());
+    // rebuild 'special' mailbox collection from the configuration
+    function provide_collect_special() {
+        $collect_special = array();
+        $mbox_list = $this->special_folder_list();
         foreach($mbox_list as $mbox) {
-            $this->folder_collect_set('collect_predefined', $mbox);
+            $collect_special[$mbox] = $this->mbox_meta($mbox);
         }
+        $this->config_put('collect_special', $collect_special);
+    }
+    
+    // rebuild 'predefined' mailbox collection from the configuration
+    function provide_collect_predefined() {
+        $collect_predefined = array();
+        $mbox_list = $this->config_get('predefined_list');
+        foreach($mbox_list as $mbox) {
+            $collect_predefined[$mbox] = $this->mbox_meta($mbox);
+        }
+        $this->config_put('collect_predefined', $collect_predefined);
     }
 
     // navigate mailbox hierarchy
@@ -301,67 +302,6 @@ class contextmenu_folder extends rcube_plugin {
     // detect imap special mailbox name
     function is_folder_special($name) {
         return $this->rc->storage->is_special_folder($name);
-    }
-    
-    // store mailbox in selected collection
-    function folder_selected_set($mbox) {
-        $this->folder_collect_set('collect_selected', $mbox);
-    }
-    
-    // remove mailbox from selected collection
-    function folder_selected_unset($mbox) {
-        $this->folder_collect_unset('collect_selected', $mbox);
-    }
-    
-    // remove all mailbox entries from selected collection
-    function folder_selected_reset() {
-        $this->config_put('collect_selected', array());
-    }
-    
-    // store mailbox in transient collection
-    function folder_transient_set($mbox) {
-        $this->folder_collect_set('collect_transient', $mbox);
-    }
-    
-    // remove mailbox from transient collection
-    function folder_transient_unset($mbox) {
-        $this->folder_collect_unset('collect_transient', $mbox);
-    }
-    
-    // remove all mailbox entries from transient collection
-    function folder_transient_reset() {
-        $this->config_put('collect_transient', array());
-    }
-    
-    // detect if mailbox is stored in the collection
-    function is_folder_collect($collect, $mbox) {
-        $folder_list = $this->config_get($collect);
-        return isset($folder_list[$mbox]);
-    }
-    
-    // add mailbox and its parents to the collection
-    function folder_collect_set($collect, $mbox) {
-        if( $mbox == self::ROOT ) {
-            return;
-        } else {
-            // $this->log($collect . ' : ' . $mbox);
-            $folder_list = $this->config_get($collect);
-            $folder_list[$mbox] = $mbox;
-            $this->config_put($collect, $folder_list);
-            $this->folder_collect_set($collect, $this->parent_mbox($mbox));
-        }
-    }
-    
-    // remove mailbox from the given collection
-    function folder_collect_unset($collect, $mbox) {
-        if( $mbox == self::ROOT ) {
-            return;
-        } else {
-            // $this->log($collect . ' : ' . $mbox);
-            $folder_list = $this->config_get($collect);
-            unset($folder_list[$mbox]);
-            $this->config_put($collect, $folder_list);
-        }
     }
     
     // find nubmer of unread messages in the mailbox
@@ -380,50 +320,6 @@ class contextmenu_folder extends rcube_plugin {
         return $filter;
     }
     
-    // recursively apply mailbox filter
-    function mailbox_filter_apply(& $filter, & $folder_list, & $index, & $folder) {
-        $mbox = $folder['id']; // full path
-        $name = $folder['name']; // base name
-        $folder_list_next = & $folder['folders']; // nested entries
-        $count = 0; // propagate cumulative flags from child to parent
-        if($filter['unread']) {
-            $count += $this->folder_count_unread($mbox) ;
-        }
-        foreach($folder_list_next as $index_next => & $folder_next) {
-            $count += $this->mailbox_filter_apply($filter, $folder_list_next, $index_next, $folder_next);
-        }
-        $apply = $count > 0 || // mailbox retention criteria
-            ( $filter['special'] && $this->is_folder_special($name) ) ||
-            ( $filter['selected'] && $this->is_folder_collect('collect_selected', $mbox) ) ||
-            ( $filter['transient'] && $this->is_folder_collect('collect_transient', $mbox) ) ||
-            ( $filter['predefined'] && $this->is_folder_collect('collect_predefined', $mbox) ) ||
-            false;
-        if( ! $apply ) {
-            unset($folder_list[$index]); 
-        }
-        return $count;
-    }
-    
-    // apply mailbox filter for 'active' category
-    function mailboxlist_filter_active(& $args) {
-        $filter = $this->provide_filter('filter_active');
-        $folder_list = & $args['list'];
-        foreach($folder_list as $index => & $folder) {
-              $this->mailbox_filter_apply($filter, $folder_list, $index, $folder);
-        }
-        return $args;
-    }
-
-    // apply mailbox filter for 'favorite' category
-    function mailboxlist_filter_favorite(& $args) {
-        $filter = $this->provide_filter('filter_favorite');
-        $folder_list = & $args['list'];
-        foreach($folder_list as $index => & $folder) {
-              $this->mailbox_filter_apply($filter, $folder_list, $index, $folder);
-        }
-        return $args;
-    }
-
     // TODO periodic folder tree refresh 
     function hook_refresh($args) {
         if($this->config_get('enable_refresh')) {
@@ -457,102 +353,19 @@ class contextmenu_folder extends rcube_plugin {
         return $args;
     }
 
-    // provide filtered mailbox view (server filter)
-    function hook_render_mailboxlist($args) {
-        if( $this->is_client_filter() ) {
-            return $args;
-        }
-        
-        $show_mode = $this->config_get('show_mode');
-        switch($show_mode){
-        case 'show_all':
-            return $args;
-        case 'show_active':
-            return $this->mailboxlist_filter_active($args);
-        case 'show_favorite':
-            return $this->mailboxlist_filter_favorite($args);
-        default:
-            $this->log('invalid $show_mode: ' . $show_mode, true);
-            return $args;
-        }
-    }
-    
-    // change current mailbox in the ui
-    function select_folder($name) {
+    // report back to client the change
+    function folder_update($action, $source, $target) {
         $output = $this->rc->output;
-        if( $this->is_client_filter()) {
-            
-        } else {
-            $location = '?' . '_task=mail' . '&' . '_mbox=' . urlencode($name);
-            $output->command('redirect', $location);
-        }
+        $status = array(
+            'action' => $action,
+            'source' => $source,
+            'target' => $target,
+        );
+        $this->log(print_r($status, true));
+        $output->command($this->key('folder_update'), $status);
         $output->send();
     }
 
-    // change mailbox view filter settings
-    public function action_show_mode() {
-        $name = 'show_mode';
-        $mode_last = $this->config_get($name);
-        $mode_next = $this->input_value($name);
-        switch($mode_next){
-        case 'show_all':
-        case 'show_active':
-        case 'show_favorite':
-            $this->config_put($name, $mode_next);
-            break;
-        default:
-            $this->log('invalid $show_mode: ' . $mode_next, true);
-            break;
-        }
-        $target = $this->input_value('target');
-        $this->select_folder($target);
-    }
-  
-    // produce flat sorted mailbox list from the collection
-    public function action_collect_list() {
-        $collect = $this->input_value('collect');
-        $folder_list = $this->config_get($collect); sort($folder_list); // FIXME
-        $output = $this->rc->output;
-        $output->command($this->key('collect_list'), array('folder_list' => $folder_list));
-        $output->send();
-    }
-    
-    // reset collection content
-    public function action_collect_reset() {
-        $collect = $this->input_value('collect');
-        switch($collect){
-        case 'selected':
-            $this->folder_selected_reset();
-            break;
-        case 'transient':
-            $this->folder_transient_reset();
-            break;
-        default:
-            $this->log('invalid $collect: ' . $mode_next, true);
-            break;
-        }
-        $target = $this->input_value('target');
-        $this->select_folder($target);
-    }
-
-    // manage mailbox membership in the 'selected' collection
-    public function action_folder_select() {
-        $mode = $this->input_value('mode');
-        $target = $this->input_value('target');
-        
-        switch($mode){
-        case 'folder_select':
-            $this->folder_selected_set($target);
-            break;
-        case 'folder_unselect':
-            $this->folder_selected_unset($target);
-            break;
-        default:
-            $this->log('invalid $mode: ' . $mode, true);
-            return;
-        }
-    }
-    
     // create complete folder tree, bottom up
     function folder_ensure_tree($target) {
         $storage = $this->rc->storage;
@@ -566,20 +379,7 @@ class contextmenu_folder extends rcube_plugin {
         return $this->folder_ensure_tree($parent) && $storage->create_folder($target, true); // recurse
     }
     
-    // report back to client the change
-    function folder_update($action, $source, $target) {
-        $output = $this->rc->output;
-        if( $this->is_client_filter()) {
-            $output->command($this->key('folder_update'), array(
-                'action' => $action,
-                'source' => $source,
-                'target' => $target,
-            ));
-        }
-        $output->send();
-    }
-
-    // create imap mailbox and switch ui to result
+    // create imap mailbox
     public function action_folder_create() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;
@@ -588,9 +388,7 @@ class contextmenu_folder extends rcube_plugin {
         $target = $this->input_value('target');
         $result = $this->folder_ensure_tree($target);
         if ($result) {
-            $this->folder_transient_set($target);
             $this->folder_update('create', $source, $target);
-            $this->select_folder($target);
         } else {
             $this->rc->display_server_error('error folder_create');
         }
@@ -610,11 +408,10 @@ class contextmenu_folder extends rcube_plugin {
                 return false;
             }
         }
-        $this->log($target);
         return $storage->delete_folder($target);
     }
 
-    // delete imap mailbox and switch ui to parent
+    // delete imap mailbox
     public function action_folder_delete() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;
@@ -624,19 +421,17 @@ class contextmenu_folder extends rcube_plugin {
         $result = $this->folder_delete($target);
         // $result = $storage->delete_folder($target);
         if ($result) {
-            $this->folder_transient_unset($target);
             $parent = $this->parent_mbox($target);
             if( $parent == self::ROOT ){
                 $parent = 'INBOX';
             }
             $this->folder_update('delete', $source, $target);
-            $this->select_folder($parent);
         } else {
             $this->rc->display_server_error('error folder_delete');
         }
     }
 
-    // rename imap mailbox and switch ui to result
+    // rename imap mailbox
     public function action_folder_rename() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;
@@ -645,35 +440,12 @@ class contextmenu_folder extends rcube_plugin {
         $target = $this->input_value('target');
         $result = $storage->rename_folder($source, $target);
         if ($result) {
-            $this->folder_transient_unset($source);
-            $this->folder_transient_set($target);
             $this->folder_update('rename', $source, $target);
-            $this->select_folder($target);
         } else {
             $this->rc->display_server_error('error folder_rename');
         }
     }
     
-    // XXX see steps/mail/folders.inc
-    function folder_reset($RCMAIL, $OUTPUT, $mbox) {
-        $trash_mbox   = $RCMAIL->config->get('trash_mbox');
-        //
-        $OUTPUT->show_message('folderpurged', 'confirmation');
-        if (!empty($_REQUEST['_reload'])) {
-            $OUTPUT->set_env('messagecount', 0);
-            $OUTPUT->set_env('pagecount', 0);
-            $OUTPUT->set_env('exists', 0);
-            $OUTPUT->command('message_list.clear');
-            $OUTPUT->command('set_rowcount', rcmail_get_messagecount_text(), $mbox);
-            $OUTPUT->command('set_unread_count', $mbox, 0);
-            $OUTPUT->command('set_quota', $RCMAIL->quota_content(null, $mbox));
-            rcmail_set_unseen_count($mbox, 0);
-            if ($mbox === $trash_mbox) {
-                $OUTPUT->command('set_trash_count', 0);
-            }
-        }
-    }
-
     // empty imap folder of all messages
     public function action_folder_purge() {
         $output = $this->rc->output;
@@ -683,7 +455,6 @@ class contextmenu_folder extends rcube_plugin {
         $target = $this->input_value('target');
         $result = $storage->clear_folder($target);
         if ($result) {
-            // $this->folder_reset($this->rc, $output, $target);
             $output->show_message('folderpurged', 'confirmation');
         } else {
             $this->rc->display_server_error('error folder_purge');
@@ -691,13 +462,6 @@ class contextmenu_folder extends rcube_plugin {
         
         $output->command($this->key('folder_purge'), array());
         $output->send();
-    }
-
-    // switch ui to provided mailbox 
-    public function action_folder_locate() {
-        $target = $this->input_value('target');
-        $this->folder_transient_set($target);
-        $this->select_folder($target);
     }
 
     // produce flat, sorted, unfiltered, mailbox list

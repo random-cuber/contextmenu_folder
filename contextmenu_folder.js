@@ -63,11 +63,6 @@ function plugin_contextmenu_folder() {
 		return rcmail.env[self.key(name)];
 	}
 
-	// apply mailbox filter on server vs on client
-	this.is_client_filter = function() {
-		return self.env('enable_client_filter') || false;
-	}
-
 	// client ui behaviour
 	this.has_feature = function has_feature(name) {
 		return (self.env('feature_choice') || []).indexOf(name) >= 0;
@@ -268,7 +263,7 @@ function plugin_contextmenu_folder() {
 		},
 	}
 
-	// provide filtered mailbox view (client filter)
+	// provide filtered mailbox view
 	this.mbox_filter_apply = function mbox_filter_apply() {
 
 		var show_mode = self.env('show_mode');
@@ -482,6 +477,7 @@ function plugin_contextmenu_folder() {
 			locate = self.mbox_root(target);
 			break;
 		case 'rename':
+			// FIXME middle branch
 			self.mbox_delete(source);
 			self.mbox_create(target);
 			locate = target;
@@ -555,9 +551,25 @@ function plugin_contextmenu_folder() {
 		});
 	}
 
+	// select matching properties
+	function object_select(object, regex) {
+		var select = {};
+		$.each(Object.keys(object), function(_, name) {
+			if (name.match(regex)) {
+				select[name] = object[name];
+			}
+		});
+		return select;
+	}
+
 	// top of mailbox hierarchy
 	function has_tree_root(mbox) {
 		return mbox == '';
+	}
+
+	// 
+	function mbox_tree_regex(mbox) {
+		return mbox + '(' + self.delimiter() + '.+)?';
 	}
 
 	// ui object
@@ -568,8 +580,9 @@ function plugin_contextmenu_folder() {
 			self.mbox_create(root, true);
 		}
 		var link = $('<a>').attr({
-			href : '#', // FIXME
-		}).click(function(event) {
+			rel : mbox,
+			href : './?_task=mail&_mbox=' + urlencode(mbox),
+		}).click(function click(event) {
 			return rcmail.command('list', mbox, this, event);
 		}).html(self.mbox_name(mbox));
 		var node = {
@@ -577,6 +590,7 @@ function plugin_contextmenu_folder() {
 			html : link,
 			classes : [ 'mailbox' ],
 		};
+		self.log(mbox);
 		rcmail.env.mailboxes[mbox] = node; // model
 		rcmail.treelist.insert(node, root, 'mailbox'); // view
 		if (no_track) {
@@ -586,16 +600,23 @@ function plugin_contextmenu_folder() {
 		}
 	}
 
-	// 
-	function mbox_tree_regex(mbox) {
-		return mbox + '(' + self.delimiter() + '.+)?';
-	}
-
 	// ui object
-	this.mbox_delete = function mbox_delete(mbox) {
-		object_delete(rcmail.env.mailboxes, mbox_tree_regex(mbox)); // model
+	this.mbox_delete = function mbox_delete(mbox, no_track) {
+		// strict stem leaf
+		var regex = mbox + self.delimiter() + '[^' + self.delimiter() + ']+$';
+		var select_list = object_select(rcmail.env.mailboxes, regex);
+		var folder_list = Object.keys(select_list);
+		$.each(folder_list, function(_, folder) {
+			self.mbox_delete(folder, true);
+		});
+		self.log(mbox);
+		delete rcmail.env.mailboxes[mbox]; // model
 		rcmail.treelist.remove(mbox); // view
-		self.track_on_delete(mbox);
+		if (no_track) {
+			return;
+		} else {
+			self.track_on_delete(mbox);
+		}
 	}
 
 	// mailbox descriptor in collection
@@ -693,10 +714,13 @@ function plugin_contextmenu_folder() {
 		var source;
 		if (self.selected_folder) {
 			source = self.selected_folder;
+			self.log('self.selected_folder');
 		} else if (rcmail.env.mailbox) {
 			source = rcmail.env.mailbox;
+			self.log('rcmail.env.mailbox');
 		} else if (param) {
 			source = param;
+			self.log('param');
 		} else {
 			source = '';
 			self.log('missing source', true);
@@ -1060,29 +1084,25 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 		self.ajax_folder_list.request();
 	}, 500);
 
-	if (self.is_client_filter()) {
-		// FIXME replace delays with ready-events
-		window.setTimeout(function remember_filter() {
+	// FIXME replace delays with ready-events
+	window.setTimeout(function remember_filter() {
+		self.log('...');
+		if (self.has_feature('remember_filter')) {
+			self.mbox_filter_apply();
+		}
+		window.setTimeout(function remember_mailbox() {
 			self.log('...');
-			if (self.has_feature('remember_filter')) {
-				self.mbox_filter_apply();
+			if (self.has_feature('remember_mailbox')) {
+				self.mbox_locate(self.env('memento_current_mailbox'));
 			}
-			window.setTimeout(function remember_mailbox() {
+			window.setTimeout(function remember_message() {
 				self.log('...');
-				if (self.has_feature('remember_mailbox')) {
-					self.mbox_locate(self.env('memento_current_mailbox'));
+				if (self.has_feature('remember_message')) {
+					self.mesg_locate(self.env('memento_current_message'));
 				}
-				window.setTimeout(function remember_message() {
-					self.log('...');
-					if (self.has_feature('remember_message')) {
-						self.mesg_locate(self.env('memento_current_message'));
-					}
-				}, 1500);
 			}, 1500);
 		}, 1500);
-	} else {
-		// noop
-	}
+	}, 1500);
 
 	var minute_msec = 60 * 1000;
 	window.setInterval(self.periodic_refresh, minute_msec);
@@ -1565,25 +1585,18 @@ plugin_contextmenu_folder.prototype.folder_locate = function folder_locate() {
 
 	var title = self.localize('folder_locate');
 
-	var ajax = new self.ajax_core('folder_locate', function request() {
+	function locate() {
 		var source = $('#source');
 		var target = $('#target');
 		var option = target.find('option:selected');
 		var folder = option.text();
-		if (self.is_client_filter()) {
-			self.mbox_locate(folder);
-			self.track_on_locate(folder);
-			return null; // no post
-		} else {
-			return {
-				target : folder,
-			}
-		}
-	});
+		self.mbox_locate(folder);
+		self.track_on_locate(folder);
+	}
 
 	var buttons = self.dialog_buttons({
 		name : 'locate',
-		func : ajax.request,
+		func : locate,
 	});
 
 	function open() {
@@ -1624,30 +1637,21 @@ plugin_contextmenu_folder.prototype.folder_change_select = function folder_chang
 		return;
 	}
 
-	if (self.is_client_filter()) {
-		var collect_selected = self.collect_selected();
-		switch (mode) {
-		case 'folder_select':
-			collect_selected[source] = self.mbox_meta(source, 'select');
-			self.mbox_mark_selected(source, true);
-			break;
-		case 'folder_unselect':
-			delete collect_selected[source];
-			self.mbox_mark_selected(source, false);
-			break;
-		default:
-			self.log('invalid mode: ' + mode);
-			break;
-		}
-		self.save_pref('collect_selected', collect_selected);
-	} else {
-		var action = self.key('folder_select');
-		rcmail.http_post(action, {
-			mode : mode,
-			source : source,
-			target : target,
-		}, rcmail.set_busy(true, 'folder_select'));
+	var collect_selected = self.collect_selected();
+	switch (mode) {
+	case 'folder_select':
+		collect_selected[source] = self.mbox_meta(source, 'select');
+		self.mbox_mark_selected(source, true);
+		break;
+	case 'folder_unselect':
+		delete collect_selected[source];
+		self.mbox_mark_selected(source, false);
+		break;
+	default:
+		self.log('invalid mode: ' + mode);
+		break;
 	}
+	self.save_pref('collect_selected', collect_selected);
 
 }
 
@@ -1799,63 +1803,36 @@ plugin_contextmenu_folder.prototype.reset_collect = function reset_collect(
 	content.append($('<tr>').append(
 			$('<td>').prop('colspan', 2).append(target_input)));
 
-	var ajax_reset_collect = new self.ajax_core('reset_collect',
-			function request() {
-				if (collect == 'collect_selected') {
-					self.mbox_render_selected(false);
-				}
-				if (collect == 'collect_transient') {
-					self.mbox_render_transient(false);
-				}
-				if (self.is_client_filter()) {
-					self.mbox_reset_collect(collect);
-					return null; // no post
-				} else {
-					return {
-						collect : collect,
-					}
-				}
-			});
+	function reset() {
+		if (collect == 'collect_selected') {
+			self.mbox_render_selected(false);
+		}
+		if (collect == 'collect_transient') {
+			self.mbox_render_transient(false);
+		}
+		self.mbox_reset_collect(collect);
+	}
 
-	var ajax_collect_list = new self.ajax_core('collect_list',
-			function request() {
-				return {
-					collect : collect,
-				};
-			}, //
-			function response(param) {
-				var target = $('#target');
-				var folder_list = param['folder_list'] || [];
-				$.each(folder_list, function(index, folder) {
-					$('<option>').prop('value', index).text(folder).appendTo(
-							target);
-				});
-			});
+	function display() {
+		var target = $('#target');
+		var func = self[collect];
+		var folder_list = Object.keys(func()).sort();
+		$.each(folder_list, function(index, folder) {
+			$('<option>').prop('value', index).text(folder).appendTo(target);
+		});
+	}
 
 	var buttons = self.dialog_buttons({
 		name : 'reset',
-		func : ajax_reset_collect.request,
+		func : reset,
 	});
 
 	function open() {
-		if (self.is_client_filter()) {
-			var func = self[collect];
-			var folder_list = Object.keys(func()).sort();
-			ajax_collect_list.response({
-				folder_list : folder_list,
-			});
-		} else {
-			ajax_collect_list.bind();
-			ajax_collect_list.request();
-		}
+		display();
 	}
 
 	function close() {
-		if (self.is_client_filter()) {
-			self.mbox_filter_apply();
-		} else {
-			ajax_collect_list.unbind();
-		}
+		self.mbox_filter_apply();
 	}
 
 	var options = self.dialog_options(mode, open, close);
@@ -1899,20 +1876,8 @@ plugin_contextmenu_folder.prototype.show_mode = function show_mode(props) {
 	self.save_pref('show_mode', show_mode);
 	self.html_by_id(self.status_id).trigger('show_mode');
 
-	var ajax = new self.ajax_core('show_mode', function request() {
-		return {
-			source : source,
-			target : target,
-			show_mode : show_mode,
-		}
-	});
-
-	if (self.is_client_filter()) {
-		self.mbox_filter_apply();
-		self.mbox_locate();
-	} else {
-		ajax.request();
-	}
+	self.mbox_filter_apply();
+	self.mbox_locate();
 
 }
 
