@@ -146,7 +146,7 @@ function plugin_contextmenu_folder() {
 	}
 
 	// folder base name
-	this.mbox_name = function mbox_name(mbox) {
+	function mbox_name(mbox) {
 		var delimiter = self.delimiter();
 		if (mbox.indexOf(delimiter) >= 0) {
 			var split = mbox.split(delimiter);
@@ -328,7 +328,7 @@ function plugin_contextmenu_folder() {
 		self.mbox_html_li(mbox).show();
 		// navigate up tree
 		var root = self.mbox_root(mbox);
-		if (has_tree_root(root)) {
+		if (is_tree_root(root)) {
 			return;
 		} else {
 			self.mbox_show_tree(root);
@@ -461,6 +461,8 @@ function plugin_contextmenu_folder() {
 			make_folder_notify);
 
 	// apply ui create/delete/rename
+	// see js/treelist.js/rcube_treelist_widget.render_node()
+	// see include/rcmail.php/rcmail.render_folder_tree_html()
 	function make_folder_update(param) {
 		self.log(self.json_encode(param, 4));
 		var action = param['action'];
@@ -477,16 +479,14 @@ function plugin_contextmenu_folder() {
 			locate = self.mbox_root(target);
 			break;
 		case 'rename':
-			// FIXME middle branch
-			self.mbox_delete(source);
-			self.mbox_create(target);
+			self.mbox_rename(source, target);
 			locate = target;
 			break;
 		default:
 			self.log('invalid action: ' + action, true);
 			return;
 		}
-		if (has_tree_root(locate)) {
+		if (is_tree_root(locate)) {
 			locate = 'INBOX';
 		}
 		self.mbox_filter_apply();
@@ -532,7 +532,7 @@ function plugin_contextmenu_folder() {
 		return self.env('icon_mapa')[name];
 	}
 
-	// pupulate context menu item
+	// populate context menu item
 	this.menu_item = function menu_item(source, entry) {
 		source.push({
 			props : entry,
@@ -563,7 +563,7 @@ function plugin_contextmenu_folder() {
 	}
 
 	// top of mailbox hierarchy
-	function has_tree_root(mbox) {
+	function is_tree_root(mbox) {
 		return mbox == '';
 	}
 
@@ -572,36 +572,73 @@ function plugin_contextmenu_folder() {
 		return mbox + '(' + self.delimiter() + '.+)?';
 	}
 
+	// ui link as text
+	function mbox_link(mbox) {
+		var rel = mbox;
+		var name = mbox_name(mbox);
+		var href = './?_task=mail&_mbox=' + urlencode(mbox);
+		var onclick = //
+		"return rcmail.command('list','" + mbox + "',this,event)";
+		var link = $('<a>').attr({
+			rel : rel,
+			href : href,
+			onclick : onclick,
+		}).html(name);
+		var html = $('<div>').append(link).html();
+		return html;
+	}
+
+	// mailbox descriptor in plugin collection
+	this.mbox_meta = function mbox_meta(mbox, action) {
+		return {
+			mbox : mbox,
+			action : action,
+			created_msec : (new Date()).getTime(),
+		}
+	}
+
+	// mailbox descriptor in rcmail.env.mailboxes
+	this.mbox_info = function mbox_info(mbox) {
+		return {
+			id : mbox,
+			name : mbox_name(mbox),
+			virtual : false,
+		}
+	}
+
+	// mailbox descriptor in rcube_treelist_widget
+	this.mbox_node = function mbox_node(mbox) {
+		return {
+			id : mbox,
+			text : mbox_name(mbox),
+			html : mbox_link(mbox),
+			classes : [ 'mailbox' ],
+			children : [],
+		};
+	}
+
 	// ui object
-	this.mbox_create = function mbox_create(mbox, no_track) {
+	this.mbox_create = function mbox_create(mbox, no_tail) {
 		var root = self.mbox_root(mbox);
-		var has_root = has_tree_root(root) || rcmail.env.mailboxes[root];
+		var has_root = is_tree_root(root) || rcmail.env.mailboxes[root];
 		if (!has_root) {
 			self.mbox_create(root, true);
 		}
-		var link = $('<a>').attr({
-			rel : mbox,
-			href : './?_task=mail&_mbox=' + urlencode(mbox),
-		}).click(function click(event) {
-			return rcmail.command('list', mbox, this, event);
-		}).html(self.mbox_name(mbox));
-		var node = {
-			id : mbox,
-			html : link,
-			classes : [ 'mailbox' ],
-		};
+		var info = self.mbox_info(mbox);
+		var node = self.mbox_node(mbox);
 		self.log(mbox);
-		rcmail.env.mailboxes[mbox] = node; // model
+		rcmail.env.mailboxes[mbox] = info; // model
 		rcmail.treelist.insert(node, root, 'mailbox'); // view
-		if (no_track) {
+		if (no_tail) {
 			return;
 		} else {
 			self.track_on_create(mbox);
+			make_rcm_foldermenu_reset();
 		}
 	}
 
 	// ui object
-	this.mbox_delete = function mbox_delete(mbox, no_track) {
+	this.mbox_delete = function mbox_delete(mbox, no_tail) {
 		// strict stem leaf
 		var regex = mbox + self.delimiter() + '[^' + self.delimiter() + ']+$';
 		var select_list = object_select(rcmail.env.mailboxes, regex);
@@ -612,20 +649,129 @@ function plugin_contextmenu_folder() {
 		self.log(mbox);
 		delete rcmail.env.mailboxes[mbox]; // model
 		rcmail.treelist.remove(mbox); // view
-		if (no_track) {
+		if (no_tail) {
 			return;
 		} else {
 			self.track_on_delete(mbox);
 		}
 	}
 
-	// mailbox descriptor in collection
-	this.mbox_meta = function mbox_meta(mbox, action) {
-		return {
-			mbox : mbox,
-			action : action,
-			created_msec : (new Date()).getTime(),
+	// recursively rename ui model entry
+	function mbox_tree_rename(base, source, target) {
+		var mbox = base.id;
+		var mbox_old = mbox;
+		var mbox_new = mbox_old.replace(source, target);
+		var temp = self.mbox_node(mbox_new);
+		base.id = temp.id;
+		base.text = temp.text;
+		base.html = temp.html;
+		self.log(mbox_old + ' -> ' + mbox_new);
+		$.each(base.children, function(_, node) {
+			mbox_tree_rename(node, source, target);
+		});
+	}
+
+	// recursively register ui model entry
+	function mbox_tree_reg_env(base, action) {
+		var mbox = base.id;
+		self.log(action + ': ' + mbox);
+		switch (action) {
+		case 'create':
+			rcmail.env.mailboxes[mbox] = self.mbox_info(mbox);
+			break;
+		case 'delete':
+			delete rcmail.env.mailboxes[mbox];
+			break;
+		default:
+			self.log('invalid action: ' + action, true);
+			return;
 		}
+		$.each(base.children, function(_, node) {
+			mbox_tree_reg_env(node, action);
+		});
+	}
+
+	// recursively transfer 'unread' counts
+	function mbox_transfer_unread(base, source, target) {
+		var mbox = base.id;
+		var unread_counts = rcmail.env.unread_counts || {};
+		var count = unread_counts[mbox];
+		if (count) {
+			var mbox_old = mbox;
+			var mbox_new = mbox.replace(source, target);
+			self.log(mbox_old + ' -> ' + mbox_new);
+			delete unread_counts[mbox_old];
+			rcmail.set_unread_count(mbox_new, count);
+		}
+		$.each(base.children, function(_, node) {
+			mbox_transfer_unread(node, source, target);
+		});
+	}
+
+	// recursively transfer 'selected' collection
+	function mbox_transfer_selected(base, source, target, no_save) {
+		var mbox = base.id;
+		var collect_selected = self.collect_selected();
+		var mbox_meta = collect_selected[mbox];
+		if (mbox_meta) {
+			var mbox_old = mbox;
+			var mbox_new = mbox.replace(source, target);
+			self.log(mbox_old + ' -> ' + mbox_new);
+			mbox_meta.mbox = mbox_new;
+			delete collect_selected[mbox_old];
+			collect_selected[mbox_new] = mbox_meta;
+			self.mbox_mark_selected(mbox_old, false);
+			self.mbox_mark_selected(mbox_new, true);
+		}
+		$.each(base.children, function(_, node) {
+			mbox_transfer_selected(node, source, target, true);
+		});
+		if (no_save) {
+			return;
+		} else {
+			self.save_pref('collect_selected', collect_selected);
+		}
+	}
+
+	// define context menu event listeners on the tree
+	function make_rcm_foldermenu_init(mbox) {
+		var item = rcmail.treelist.get_item(mbox);
+		var item_id = '#' + item.id;
+		self.log(mbox + ' [' + item_id + ']');
+		var selector = [ item_id, item_id + ' li ', ].join(',');
+		rcm_foldermenu_init(selector, { // plugin:contextmenu
+			'menu_source' : [ '#rcmFolderMenu', '#mailboxoptionsmenu' ]
+		});
+	}
+
+	// define context menu event listeners on the tree
+	function make_rcm_foldermenu_reset() {
+		self.log('...');
+		var selector = '#mailboxlist li';
+		$(selector).off('click contextmenu');
+		rcm_foldermenu_init(selector, { // plugin:contextmenu
+			'menu_source' : [ '#rcmFolderMenu', '#mailboxoptionsmenu' ]
+		});
+	}
+
+	// ui object
+	this.mbox_rename = function mbox_rename(source, target) {
+		var root = self.mbox_root(source);
+		var node_old = rcmail.treelist.get_node(source);
+		var node_new = $.extend(true, {}, node_old); // clone
+		mbox_tree_rename(node_new, source, target);
+		// delete
+		mbox_tree_reg_env(node_old, 'delete'); // model
+		rcmail.treelist.remove(source); // view
+		self.track_on_delete(source);
+		// create
+		mbox_tree_reg_env(node_new, 'create'); // model
+		rcmail.treelist.insert(node_new, root, 'mailbox'); // view
+		self.track_on_create(target);
+		// update
+		mbox_transfer_unread(node_old, source, target);
+		mbox_transfer_selected(node_old, source, target);
+		make_rcm_foldermenu_reset();
 	}
 
 	// transient collection
