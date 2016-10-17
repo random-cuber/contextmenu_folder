@@ -119,6 +119,10 @@ Menu entries:
 * `Copy to folder` : copy selected mailbox messages to a folder located by quick folder name search
 * `Move to folder` : move selected mailbox messages to a folder located by quick folder name search
 
+Translation
+-----------
+
+Contribute to [translation via transifex][translation].
 
 [roundcube_arch]: https://wiki.archlinux.org/index.php/Roundcube
 [jqueryui_link]: https://github.com/roundcube/roundcubemail/tree/master/plugins/jqueryui
@@ -130,3 +134,5 @@ Menu entries:
 [message_list_context_menu]: https://raw.githubusercontent.com/random-cuber/contextmenu_folder/master/build/message_list_context_menu.png
 
 [default_config]: https://github.com/random-cuber/contextmenu_folder/blob/master/default.inc.php
+
+[translation]: https://www.transifex.com/random-cuber/contextmenu_folder/

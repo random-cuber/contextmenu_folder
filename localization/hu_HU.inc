@@ -11,6 +11,8 @@ $labels['folder_delete'] = 'Mappa törlése';
 $labels['folder_rename'] = 'Mappa átnevezése';
 $labels['folder_locate'] = 'Mappa keresése';
 
+$labels['folder_purge'] = 'Purge folder';
+
 $labels['folder_read_this'] = 'Összes megjelölése olvasottként';
 $labels['folder_read_tree'] = 'Összes megjelölése olvasottként';
 
@@ -57,7 +59,7 @@ $labels['message_move'] = 'Helyezd át mappába';
 
 // settings
 
-$labels['folder_menu'] = 'Mappa menü';
+$labels['plugin_folder_menu'] = 'Plugin: Folder Menu';
 
 $labels['activate_plugin'] = 'Kiegészítő aktiválása';
 
@@ -67,9 +69,14 @@ $labels['enable_folder_list_context_menu'] = 'Üzenetablak jobbgombos menü';
 $labels['enable_folder_list_control_menu'] = 'Mappalista kiegészítő menü';
 $labels['enable_message_list_context_menu'] = 'Mappalista jobbgombos menü';
 
+$labels['feature_choice'] = 'Enable plugin features';
+
 $labels['filter_active'] = '"Aktív" kategória szűrői';
 $labels['filter_favorite'] = '"Kedvencek" kategória szűrői';
 
 $labels['predefined_list'] = '"predefined" lista tartalma';
 $labels['contact_folder_format_list'] = 'Kontakt mappa formátum lista';
 
+$labels['transient_expire_mins'] = 'Transient folder expiration time (mins)';
+
+?>

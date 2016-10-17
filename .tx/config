@@ -1,0 +1,9 @@
+[main]
+type = PHP_ALT_ARRAY
+host = https://www.transifex.com
+lang_map = be: be_BE, sr: sr_CS, fa: fa_AF, lb: lb_LU, fr: fr_FR
+
+[contextmenu_folder.localization]
+source_lang = en_US
+source_file = localization/en_US.inc
+file_filter = localization/<lang>.inc
