@@ -81,26 +81,6 @@ $config['plugin.contextmenu_folder.predefined_list'] = array(
         'Sent/Sort',
 );
 
-// persisted mailboxes included in the 'special' filter type
-$config['plugin.contextmenu_folder.collect_special'] = array(
-        'default' => array( 'created_msec' => 0 ),
-);
-
-// persisted mailboxes included in the 'selected' filter type
-$config['plugin.contextmenu_folder.collect_selected'] = array(
-        'default' => array( 'created_msec' => 0 ),
-);
-
-// persisted mailboxes included in the 'transient' filter type
-$config['plugin.contextmenu_folder.collect_transient'] = array(
-        'default' => array( 'created_msec' => 0 ),
-);
-
-// persisted mailboxes included in the 'predefined' filter type
-$config['plugin.contextmenu_folder.collect_predefined'] = array(
-        'default' => array( 'created_msec' => 0 ),
-);
-
 // expiration time for auto remove of transient mailbox collection, minutes
 $config['plugin.contextmenu_folder.transient_expire_mins'] = 20;
 

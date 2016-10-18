@@ -26,22 +26,22 @@ function plugin_contextmenu_folder() {
 
 	//
 	this.collect_special = function() { // keep name
-		return self.env('collect_special');
+		return self.env('collect_special') || {};
 	}
 
 	//
 	this.collect_selected = function() { // keep name
-		return self.env('collect_selected');
+		return self.env('collect_selected') || {};
 	}
 
 	// 
 	this.collect_transient = function() { // keep name
-		return self.env('collect_transient');
+		return self.env('collect_transient') || {};
 	}
 
 	// 
 	this.collect_predefined = function() { // keep name
-		return self.env('collect_predefined');
+		return self.env('collect_predefined') || {};
 	}
 
 	// plugin name space
@@ -491,6 +491,7 @@ function plugin_contextmenu_folder() {
 		}
 		self.mbox_filter_apply();
 		self.mbox_locate(locate);
+		self.ajax_folder_list.request();
 	}
 
 	// process server folder changes on client
@@ -839,19 +840,23 @@ function plugin_contextmenu_folder() {
 	}
 
 	// remember between sessions
-	this.update_current_mailbox = function(mailbox) {
-		var mailbox = mailbox ? mailbox : rcmail.env.mailbox;
-		self.save_pref('memento_current_mailbox', mailbox);
+	this.remember_current_mailbox = function remember_current_mailbox(mailbox) {
+		if (self.has_feature('remember_mailbox')) {
+			var mailbox = mailbox ? mailbox : rcmail.env.mailbox;
+			self.save_pref('memento_current_mailbox', mailbox);
+		}
 	}
 
 	// remember between sessions
-	this.update_current_message = function(message) {
-		var message = message ? message : self.selected_message;
-		self.save_pref('memento_current_message', message);
+	this.remember_current_message = function remember_current_message(message) {
+		if (self.has_feature('remember_message')) {
+			var message = message ? message : self.selected_message;
+			self.save_pref('memento_current_message', message);
+		}
 	}
 
 	// provide localization
-	this.localize = function(name) {
+	this.localize = function localize(name) {
 		return rcmail.get_label(name, 'contextmenu_folder');
 	}
 
@@ -1057,6 +1062,124 @@ function plugin_contextmenu_folder() {
 
 }
 
+// plugin setup
+plugin_contextmenu_folder.prototype.initialize = function initialize() {
+	var self = this;
+
+	if (self.is_plugin_active()) {
+		self.log('active');
+	} else {
+		self.log('inactive');
+		return;
+	}
+
+	if (rcmail.env['framed']) {
+		self.log('error: framed', true);
+		return;
+	}
+
+	// control resource select/unselect
+	function rcmail_menu_work(action, param) {
+		var name = param.name;
+		var operation = name + ': ' + action + ': ';
+		if (name == 'rcm_folderlist') { // plugin:contextmenu
+			if (action == 'open') {
+				self.selected_folder = rcmail.env.context_menu_source_id;
+			}
+			if (action == 'close') {
+				self.selected_folder = null;
+			}
+			self.log(operation + self.selected_folder);
+		}
+		if (name == 'rcm_messagelist') { // plugin:contextmenu
+			if (action == 'open') {
+				self.selected_message = rcmail.get_single_uid();
+				self.ajax_header_list.request(self.selected_message);
+			}
+			if (action == 'close') {
+				self.selected_message = null;
+			}
+			self.log(operation + self.selected_message);
+		}
+	}
+
+	// use folder select for context menu source
+	function rcmail_select_folder(param) {
+		var folder = param.folder;
+		if (folder) {
+			self.log(folder);
+			rcmail.env.context_menu_source_id = folder;
+			self.remember_current_mailbox(folder);
+		} else {
+			self.log('...');
+		}
+	}
+
+	// use message select for context menu headers
+	function rcmail_select_message(widget) {
+		var message = rcmail.get_single_uid();
+		if (message) {
+			self.log(message);
+			self.selected_message = message;
+			self.remember_current_message(message);
+			window.setTimeout(function prevent_race_save_pref() {
+				self.ajax_header_list.request(message);
+			}, 100);
+		} else {
+			self.log('...');
+		}
+	}
+
+	rcmail.addEventListener('menu-open', rcmail_menu_work.bind(null, 'open'));
+	rcmail.addEventListener('menu-close', rcmail_menu_work.bind(null, 'close'));
+	rcmail.addEventListener('selectfolder', rcmail_select_folder);
+
+	if (rcmail.message_list) {
+		rcmail.message_list.addEventListener('select', rcmail_select_message);
+	}
+
+	self.ajax_header_list.bind();
+	self.ajax_folder_list.bind();
+	self.ajax_folder_purge.bind();
+	self.ajax_folder_notify.bind();
+	self.ajax_folder_update.bind();
+	self.ajax_folder_scan_tree.bind();
+
+	self.register_command_list();
+
+	self.mbox_render_selected(true);
+	self.mbox_render_transient(true);
+
+	window.setTimeout(function init_model() {
+		self.log('...');
+		self.ajax_folder_list.request();
+	}, 500);
+
+	// FIXME replace delays with ready-events
+	window.setTimeout(function remember_filter() {
+		self.log('...');
+		if (self.has_feature('remember_filter')) {
+			self.mbox_filter_apply();
+		}
+		window.setTimeout(function remember_mailbox() {
+			self.log('...');
+			if (self.has_feature('remember_mailbox')) {
+				self.mbox_locate(self.env('memento_current_mailbox'));
+			}
+			window.setTimeout(function remember_message() {
+				self.log('...');
+				if (self.has_feature('remember_message')) {
+					self.mesg_locate(self.env('memento_current_message'));
+				}
+			}, 1500);
+		}, 1500);
+	}, 1500);
+
+	var minute_msec = 60 * 1000;
+	window.setInterval(self.periodic_refresh, minute_msec);
+
+}
+
 // dialog content
 plugin_contextmenu_folder.prototype.html_list = function html_list(args, opts) {
 	var self = this;
@@ -1135,124 +1258,6 @@ plugin_contextmenu_folder.prototype.html_list = function html_list(args, opts) {
 	content.build(entry_list);
 
 	return content;
-}
-
-// plugin setup
-plugin_contextmenu_folder.prototype.initialize = function initialize() {
-	var self = this;
-
-	if (self.is_plugin_active()) {
-		self.log('active');
-	} else {
-		self.log('inactive');
-		return;
-	}
-
-	if (rcmail.env['framed']) {
-		self.log('error: framed', true);
-		return;
-	}
-
-	// control resource select/unselect
-	function rcmail_menu_work(action, param) {
-		var name = param.name;
-		var operation = name + ': ' + action + ': ';
-		if (name == 'rcm_folderlist') { // plugin:contextmenu
-			if (action == 'open') {
-				self.selected_folder = rcmail.env.context_menu_source_id;
-			}
-			if (action == 'close') {
-				self.selected_folder = null;
-			}
-			self.log(operation + self.selected_folder);
-		}
-		if (name == 'rcm_messagelist') { // plugin:contextmenu
-			if (action == 'open') {
-				self.selected_message = rcmail.get_single_uid();
-				self.ajax_header_list.request(self.selected_message);
-			}
-			if (action == 'close') {
-				self.selected_message = null;
-			}
-			self.log(operation + self.selected_message);
-		}
-	}
-
-	// use folder select for context menu source
-	function rcmail_select_folder(param) {
-		var folder = param.folder;
-		if (folder) {
-			self.log(folder);
-			rcmail.env.context_menu_source_id = folder;
-			self.update_current_mailbox(folder);
-		} else {
-			self.log('...');
-		}
-	}
-
-	// use message select for context menu headers
-	function rcmail_select_message(widget) {
-		var message = rcmail.get_single_uid();
-		if (message) {
-			self.log(message);
-			self.selected_message = message;
-			self.update_current_message(message); // save_pref
-			window.setTimeout(function prevent_race_save_pref() {
-				self.ajax_header_list.request(message);
-			}, 100);
-		} else {
-			self.log('...');
-		}
-	}
-
-	rcmail.addEventListener('menu-open', rcmail_menu_work.bind(null, 'open'));
-	rcmail.addEventListener('menu-close', rcmail_menu_work.bind(null, 'close'));
-	rcmail.addEventListener('selectfolder', rcmail_select_folder);
-
-	if (rcmail.message_list) {
-		rcmail.message_list.addEventListener('select', rcmail_select_message);
-	}
-
-	self.ajax_header_list.bind();
-	self.ajax_folder_list.bind();
-	self.ajax_folder_purge.bind();
-	self.ajax_folder_notify.bind();
-	self.ajax_folder_update.bind();
-	self.ajax_folder_scan_tree.bind();
-
-	self.register_command_list();
-
-	self.mbox_render_selected(true);
-	self.mbox_render_transient(true);
-
-	window.setTimeout(function init_model() {
-		self.log('...');
-		self.ajax_folder_list.request();
-	}, 500);
-
-	// FIXME replace delays with ready-events
-	window.setTimeout(function remember_filter() {
-		self.log('...');
-		if (self.has_feature('remember_filter')) {
-			self.mbox_filter_apply();
-		}
-		window.setTimeout(function remember_mailbox() {
-			self.log('...');
-			if (self.has_feature('remember_mailbox')) {
-				self.mbox_locate(self.env('memento_current_mailbox'));
-			}
-			window.setTimeout(function remember_message() {
-				self.log('...');
-				if (self.has_feature('remember_message')) {
-					self.mesg_locate(self.env('memento_current_message'));
-				}
-			}, 1500);
-		}, 1500);
-	}, 1500);
-
-	var minute_msec = 60 * 1000;
-	window.setInterval(self.periodic_refresh, minute_msec);
-
 }
 
 // dialog content

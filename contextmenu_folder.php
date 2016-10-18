@@ -350,6 +350,7 @@ class contextmenu_folder extends rcube_plugin {
     function hook_new_messages($args){
         $output = $this->rc->output;
         $output->command($this->key('folder_notify'), array('folder' => $args['mailbox']));
+        // $output->send(); // executed elsewhere
         return $args;
     }
 
