@@ -13,7 +13,7 @@ class contextmenu_folder extends rcube_plugin {
         'transient',
         'predefined',
     );
-    
+
     // client environment variables, push/pull
     private static $allowed_names = array(
         'show_mode',
@@ -28,7 +28,7 @@ class contextmenu_folder extends rcube_plugin {
         'memento_contact_header_item',
         'memento_contact_format_item',
     );
-    
+
     // client environment variables, push only
     private static $environ_names = array(
         'activate_plugin',
@@ -48,7 +48,7 @@ class contextmenu_folder extends rcube_plugin {
         'hide_mesg_menu_list',
         'transient_expire_mins',
     );
-    
+
     // plugin ajax registered actions
     private static $action_names = array(
         'header_list',
@@ -108,9 +108,9 @@ class contextmenu_folder extends rcube_plugin {
             return;
         }
     }
-    
+
     ////////////////////////////
-    
+
     // plugin name space
     function key($name) {
         return 'plugin.contextmenu_folder.' . $name; // keep in sync with *.js
@@ -133,29 +133,29 @@ class contextmenu_folder extends rcube_plugin {
 
     // load plugin preferences
     function config_get($name) {
-        $key = $this->key($name); 
+        $key = $this->key($name);
         return $this->rc->config->get($key);
     }
-    
+
     // save plugin preferences
     function config_put($name, $value) {
         $key = $this->key($name);
         $this->rc->user->save_prefs(array($key => $value));
     }
-    
+
     // read client post result
     function input_value($name) {
         $name = str_replace('.', '_', $name); // PHP convention
         return rcube_utils::get_input_value($name, rcube_utils::INPUT_POST);
     }
-    
-    // imap backend storage mailbox separator 
+
+    // imap backend storage mailbox separator
     function hierarchy_delimiter() {
         return $this->rc->storage->get_hierarchy_delimiter();
     }
     
     // load plugin default configuration file
-    function provide_default($name = 'default.inc.php') {
+    function provide_default($name = 'config.inc.php') {
         $config = null;
         $path = $this->home . '/' . $name;
         if ($path && is_file($path) && is_readable($path)) {
@@ -183,7 +183,7 @@ class contextmenu_folder extends rcube_plugin {
         $this->add_hook('refresh', array($this, 'hook_refresh'));
         $this->add_hook('preferences_update', array($this, 'hook_preferences_update'));
     }
-    
+
     // mail
     function init_mail_action() {
         foreach(self::$action_names as $name) {
@@ -200,7 +200,7 @@ class contextmenu_folder extends rcube_plugin {
         $this->include_stylesheet($this->local_skin_path() . '/style.css');
         $this->provide_client_env_var();
     }
-    
+
     // refresh
     function init_refresh_hook() {
         $this->add_hook('new_messages', array($this, 'hook_new_messages'));
@@ -214,7 +214,7 @@ class contextmenu_folder extends rcube_plugin {
         }
         $this->rc->output->set_env($key, $value);
     }
-    
+
     // allow to save these prefs on demand
     function provide_allowed_prefs() {
         $allowed_prefs = array();
@@ -223,7 +223,7 @@ class contextmenu_folder extends rcube_plugin {
         }
         $this->allowed_prefs = $allowed_prefs;
     }
-    
+
     // client environment variables
     function provide_client_env_var() {
         $name_list = array_merge(
@@ -233,32 +233,32 @@ class contextmenu_folder extends rcube_plugin {
            $this->set_env($name);
         }
     }
-    
+
     // root vs frame window request
     function is_root_request() {
         return empty($_REQUEST['_framed']);
     }
-    
+
     // html vs ajax request
     function is_html_request() {
         return $this->rc->output->type == 'html';
     }
-    
+
     // root vs frame window request
     function is_frame_request() {
         return isset($_REQUEST['_framed']);
     }
-    
+
     // build list of imap special mailbox names
     function special_folder_list() {
         $storage = $this->rc->get_storage();
         $special_folders = $storage->get_special_folders();
         $folder_list = array_merge(
-            array('inbox' => 'INBOX'), $special_folders 
+            array('inbox' => 'INBOX'), $special_folders
         );
         return $folder_list;
     }
-    
+
     // mailbox descriptor in collection
     function mbox_meta($mbox = 'default', $action = 'default', $created_msec = 0) {
         $meta_info = array(
@@ -268,7 +268,7 @@ class contextmenu_folder extends rcube_plugin {
         );
         return $meta_info;
     }
-    
+
     // rebuild 'special' mailbox collection from the configuration
     function provide_collect_special() {
         $collect_special = array();
@@ -278,7 +278,7 @@ class contextmenu_folder extends rcube_plugin {
         }
         $this->config_put('collect_special', $collect_special);
     }
-    
+
     // rebuild 'predefined' mailbox collection from the configuration
     function provide_collect_predefined() {
         $collect_predefined = array();
@@ -298,18 +298,18 @@ class contextmenu_folder extends rcube_plugin {
               return substr($mbox, 0, strrpos($mbox, $delimiter));
         }
     }
-    
+
     // detect imap special mailbox name
     function is_folder_special($name) {
         return $this->rc->storage->is_special_folder($name);
     }
-    
+
     // find nubmer of unread messages in the mailbox
     function folder_count_unread($mbox) {
         $mode = 'UNSEEN'; $force = true; $status = true;
         return $this->rc->storage->count($mbox, $mode, $force, $status);
     }
-    
+
     // build mailbox filter flags from configuration
     function provide_filter($name) {
         $filter = array(); // $filter[type] = true|false
@@ -319,8 +319,8 @@ class contextmenu_folder extends rcube_plugin {
         }
         return $filter;
     }
-    
-    // TODO periodic folder tree refresh 
+
+    // TODO periodic folder tree refresh
     function hook_refresh($args) {
         if($this->config_get('enable_refresh')) {
             $this->log('TODO ');
@@ -328,7 +328,7 @@ class contextmenu_folder extends rcube_plugin {
         }
         return $args;
     }
-    
+
     // inject plugin default configuration
     function hook_config_get($args){
         $name = $args['name'];
@@ -345,7 +345,7 @@ class contextmenu_folder extends rcube_plugin {
         // $this->log(print_r($args, true));
         return $args;
     }
-    
+
     // notification for auto show 'unread' mailboxes
     function hook_new_messages($args){
         $output = $this->rc->output;
@@ -379,12 +379,12 @@ class contextmenu_folder extends rcube_plugin {
         }
         return $this->folder_ensure_tree($parent) && $storage->create_folder($target, true); // recurse
     }
-    
+
     // create imap mailbox
     public function action_folder_create() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;
-          
+
         $source = '';
         $target = $this->input_value('target');
         $result = $this->folder_ensure_tree($target);
@@ -416,7 +416,7 @@ class contextmenu_folder extends rcube_plugin {
     public function action_folder_delete() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;
-          
+
         $source = '';
         $target = $this->input_value('target');
         $result = $this->folder_delete($target);
@@ -436,7 +436,7 @@ class contextmenu_folder extends rcube_plugin {
     public function action_folder_rename() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;
-          
+
         $source = $this->input_value('source');
         $target = $this->input_value('target');
         $result = $storage->rename_folder($source, $target);
@@ -446,12 +446,12 @@ class contextmenu_folder extends rcube_plugin {
             $this->rc->display_server_error('error folder_rename');
         }
     }
-    
+
     // empty imap folder of all messages
     public function action_folder_purge() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;
-        
+
         $source = $this->input_value('source');
         $target = $this->input_value('target');
         $result = $storage->clear_folder($target);
@@ -460,7 +460,7 @@ class contextmenu_folder extends rcube_plugin {
         } else {
             $this->rc->display_server_error('error folder_purge');
         }
-        
+
         $output->command($this->key('folder_purge'), array());
         $output->send();
     }
@@ -469,7 +469,7 @@ class contextmenu_folder extends rcube_plugin {
     public function action_folder_list() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;
-        
+
         $folder_list = $storage->list_folders();
         $output->command($this->key('folder_list'), array('folder_list' => $folder_list));
         $output->send();
@@ -478,10 +478,10 @@ class contextmenu_folder extends rcube_plugin {
     // mark all un-seen messages in the mailbox as read
     function folder_mark_read($target) {
         $this->log($target);
-        
+
         $output = $this->rc->output;
         $storage = $this->rc->storage;
-        
+
         $search = $storage->search_once($target, 'ALL UNSEEN', true);
         if ($search->is_empty()){
             return;
@@ -496,10 +496,10 @@ class contextmenu_folder extends rcube_plugin {
     public function action_folder_scan_tree() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;
-        
+
         $target = $this->input_value('target');
         $scan_mode = $this->input_value('scan_mode');
-        
+
         switch($scan_mode) {
         case 'read_this':
             $this->folder_mark_read($target);
@@ -517,16 +517,16 @@ class contextmenu_folder extends rcube_plugin {
             $this->log('invalid $scan_mode: ' . $scan_mode, true);
             break;
         }
-        
+
         // confirm to client when done
         $output->command($this->key('folder_scan_tree'), array(
             'target' => $target,
             'scan_mode' => $scan_mode,
         ));
-        
+
         $output->send();
     }
-    
+
     // guess business name from email domain
     function company_name($domain) {
         $generic_list = $this->config_get('domain_generic_list');
@@ -534,7 +534,7 @@ class contextmenu_folder extends rcube_plugin {
         $domain = strtolower($domain);
         $company = explode(".", $domain);
         if (in_array(end($company), $generic_list)) {
-            array_pop($company); 
+            array_pop($company);
             $company = end($company);
         } else if (in_array(end($company), $country_list)) {
             array_pop($company);
@@ -584,9 +584,9 @@ class contextmenu_folder extends rcube_plugin {
         $output->command($this->key('header_list'), array('header_list' => $header_list));
         $output->send('plugin');
     }
-    
+
     ////////////////////////////
-    
+
     // settings
     function init_settings_hook() {
         $this->add_hook('preferences_list', array($this, 'hook_preferences_list'));
@@ -605,7 +605,7 @@ class contextmenu_folder extends rcube_plugin {
     function is_plugin_section($args) {
         return $args['section'] == 'mailbox';
     }
-    
+
     // settings exposed to user
     function settings_checkbox_list() {
         return $this->config_get('settings_checkbox_list');
@@ -625,7 +625,7 @@ class contextmenu_folder extends rcube_plugin {
     function settings_text_list() {
         return $this->config_get('settings_text_list');
     }
-    
+
     // settings checkbox
     function build_checkbox(& $entry, $name) {
         $key = $this->key($name);
@@ -645,7 +645,7 @@ class contextmenu_folder extends rcube_plugin {
         }
         $key = $this->key($name);
         $select = new html_select(array(
-             'id' => $key, 'name' => $key . '[]', // use array 
+             'id' => $key, 'name' => $key . '[]', // use array
              'multiple' => true, 'size' => 5,
         ));
         $select->add($option_list, $option_list); // value => content
@@ -654,7 +654,7 @@ class contextmenu_folder extends rcube_plugin {
             'content' => $select->show($this->config_get($name)),
         );
     }
-    
+
     // settings multi line text area
     function build_textarea(& $entry, $name) {
         $key = $this->key($name);
@@ -666,7 +666,7 @@ class contextmenu_folder extends rcube_plugin {
             'content' => $textarea->show(implode(PHP_EOL, $this->config_get($name))),
         );
     }
-    
+
     // settings single line text input
     function build_text(& $entry, $name) {
         $key = $this->key($name);
@@ -678,7 +678,7 @@ class contextmenu_folder extends rcube_plugin {
             'content' => $input->show($this->config_get($name)),
         );
     }
-    
+
     // build settings ui
     function hook_preferences_list($args) {
         if ($this->is_plugin_section($args)) {
@@ -701,19 +701,19 @@ class contextmenu_folder extends rcube_plugin {
         }
         return $args;
     }
-    
+
     // settings checkbox
     function persist_checkbox(& $prefs, $name) {
         $key = $this->key($name); $value = $this->input_value($key);
         $prefs[$key] =  $value ? true : false;
     }
-  
+
     // settings multi select
     function persist_select(& $prefs, $name) {
         $key = $this->key($name); $value = $this->input_value($key);
         $prefs[$key] = $value;
     }
-  
+
     // settings multi line text area
     function persist_textarea(& $prefs, $name) {
         $key = $this->key($name); $value = $this->input_value($key);
@@ -729,7 +729,7 @@ class contextmenu_folder extends rcube_plugin {
         $key = $this->key($name); $value = $this->input_value($key);
         $prefs[$key] = trim($value);
     }
-    
+
     // persist user settings
     function hook_preferences_save($args) {
         if ($this->is_plugin_section($args)) {
