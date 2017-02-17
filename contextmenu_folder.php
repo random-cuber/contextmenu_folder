@@ -154,14 +154,25 @@ class contextmenu_folder extends rcube_plugin {
         return $this->rc->storage->get_hierarchy_delimiter();
     }
     
-    // load plugin default configuration file
-    function provide_default($name = 'config.inc.php') {
+    // verify if file is present at path
+    function has_file($path) {
+    	 return $path && is_file($path) && is_readable($path);
+    }
+
+    // load plugin default configuration file(s)
+    function provide_default() {
         $config = null;
-        $path = $this->home . '/' . $name;
-        if ($path && is_file($path) && is_readable($path)) {
-            ob_start();
-            include($path);
-            ob_end_clean();
+        $path = $this->home . '/' . 'config.inc.php.dist';
+        if ($this->has_file($path)) {
+        	ob_start();
+        	include($path);
+        	ob_end_clean();
+        }
+        $path = $this->home . '/' . 'config.inc.php';
+        if ($this->has_file($path)) {
+        	ob_start();
+        	include($path);
+        	ob_end_clean();
         }
         if (is_array($config)) {
             $this->config_default = $config;
