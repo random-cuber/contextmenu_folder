@@ -83,18 +83,21 @@ class contextmenu_folder extends rcube_plugin {
             // periodic client pull
             if($action == 'refresh') {
                 $this->init_config();
+                $this->log('client pull');
                 $this->init_refresh_hook();
                 return;
             }
             // plugin ajax action post
             if (strpos($action, $this->key('')) === 0) {
                 $this->init_config();
+                $this->log('action post: ' . $action);
                 $this->init_mail_action();
                 return;
             }
             // application window load
             if ( $action == '' && $this->is_html_request()) {
                 $this->init_config();
+                $this->log('window load');
                 $this->init_mail_hook();
                 $this->init_mail_html_page();
                 return;
@@ -103,6 +106,7 @@ class contextmenu_folder extends rcube_plugin {
         }
         if ($task == 'settings') {
             $this->init_config();
+            $this->log('settings');
             $this->init_settings_hook();
             $this->init_settings_html_page();
             return;
@@ -119,9 +123,10 @@ class contextmenu_folder extends rcube_plugin {
     // plugin server logger
     function log($line, $force = false) {
         if($this->config_get('enable_logging') || $force){
-            $file = $this->key('log');
-            $func = debug_backtrace()[1]['function'];
-            $text = $func . ' : ' . $line;
+        	$head = $this->key('');
+        	$file = $this->key('log');
+        	$func = debug_backtrace()[1]['function'];
+            $text = $head . $func . ' : ' . $line;
             rcube::write_log($file, $text);
         }
     }
@@ -503,7 +508,7 @@ class contextmenu_folder extends rcube_plugin {
         rcmail_send_unread_count($target, true);
     }
 
-    // recursively navigate mailbox and its descendats and mark all as read
+    // recursively navigate mailbox and its descendants and mark all as read
     public function action_folder_scan_tree() {
         $output = $this->rc->output;
         $storage = $this->rc->storage;

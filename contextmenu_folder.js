@@ -50,11 +50,14 @@ function plugin_contextmenu_folder() {
 	}
 
 	// plugin client logger
-	this.log = function(text, force) {
+	this.log = function log(text, force) {
 		if (self.env('enable_logging') || force) {
-			var name = arguments.callee.caller.name;
-			var entry = self.key(name);
-			rcmail.log(entry + ': ' + text);
+			if (console && console.log) {
+				var name = arguments.callee.caller.name;
+				var entry = self.key(name);
+				var color = force ? 'color: #8B0000' : 'color: #000080'; // red:blue
+				console.log('%c' + entry + ': ' + text, color);
+			}
 		}
 	};
 
@@ -267,7 +270,7 @@ function plugin_contextmenu_folder() {
 	this.mbox_filter_apply = function mbox_filter_apply() {
 
 		var show_mode = self.env('show_mode');
-		self.log(show_mode);
+		self.log('show_mode=' + show_mode);
 
 		var treelist = rcmail.treelist;
 		var container = treelist.container;
@@ -282,7 +285,8 @@ function plugin_contextmenu_folder() {
 			break;
 		}
 
-		var filter_list = self.filter_list();
+		var filter_list = self.filter_list(show_mode);
+		self.log('filter_list=' + filter_list);
 
 		function match(mbox) {
 			for (var idx = 0, len = filter_list.length; idx < len; idx++) {
@@ -295,6 +299,7 @@ function plugin_contextmenu_folder() {
 		}
 
 		container.find('li').hide();
+		
 		container.find('li').each(function filter_apply(index) {
 			var html_li = $(this);
 			var mbox = html_li.data('id');
@@ -1011,7 +1016,7 @@ function plugin_contextmenu_folder() {
 			id : 'submit',
 			text : self.localize( //
 			submit && submit.name ? submit.name : 'submit'),
-			class : 'mainaction',
+			'class' : 'mainaction',
 			click : function() {
 				if (!$('#submit').prop('disabled')) {
 					submit && submit.func ? submit.func() : true;
@@ -1129,15 +1134,7 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 			self.log('...');
 		}
 	}
-
-	rcmail.addEventListener('menu-open', rcmail_menu_work.bind(null, 'open'));
-	rcmail.addEventListener('menu-close', rcmail_menu_work.bind(null, 'close'));
-	rcmail.addEventListener('selectfolder', rcmail_select_folder);
-
-	if (rcmail.message_list) {
-		rcmail.message_list.addEventListener('select', rcmail_select_message);
-	}
-
+	
 	self.ajax_header_list.bind();
 	self.ajax_folder_list.bind();
 	self.ajax_folder_purge.bind();
@@ -1147,36 +1144,53 @@ plugin_contextmenu_folder.prototype.initialize = function initialize() {
 
 	self.register_command_list();
 
-	self.mbox_render_selected(true);
-	self.mbox_render_transient(true);
+	self.ajax_folder_list.request();
 
-	window.setTimeout(function init_model() {
-		self.log('...');
-		self.ajax_folder_list.request();
-	}, 500);
+	// delayed plugin setup
+	function plugin_setup() {
 
-	// FIXME replace delays with ready-events
-	window.setTimeout(function remember_filter() {
-		self.log('...');
-		if (self.has_feature('remember_filter')) {
-			self.mbox_filter_apply();
-		}
-		window.setTimeout(function remember_mailbox() {
+		self.mbox_render_selected(true);
+		self.mbox_render_transient(true);
+
+		// FIXME replace delays with ready-events
+		window.setTimeout(function remember_filter() {
 			self.log('...');
-			if (self.has_feature('remember_mailbox')) {
-				self.mbox_locate(self.env('memento_current_mailbox'));
+			if (self.has_feature('remember_filter')) {
+				self.mbox_filter_apply();
 			}
-			window.setTimeout(function remember_message() {
+			window.setTimeout(function remember_mailbox() {
 				self.log('...');
-				if (self.has_feature('remember_message')) {
-					self.mesg_locate(self.env('memento_current_message'));
+				if (self.has_feature('remember_mailbox')) {
+					self.mbox_locate(self.env('memento_current_mailbox'));
 				}
-			}, 1500);
-		}, 1500);
-	}, 1500);
+				window.setTimeout(function remember_message() {
+					self.log('...');
+					if (self.has_feature('remember_message')) {
+						self.mesg_locate(self.env('memento_current_message'));
+					}
+				}, 500);
+			}, 500);
+		}, 500);
 
-	var minute_msec = 60 * 1000;
-	window.setInterval(self.periodic_refresh, minute_msec);
+		var minute_msec = 60 * 1000;
+		window.setInterval(self.periodic_refresh, minute_msec);
+	}
+
+	// delayed plugin setup
+	function rcmail_responseafter_getunread(param) {
+		var response = param.response;
+		plugin_setup();
+		rcmail.removeEventListener('responseaftergetunread', rcmail_responseafter_getunread);
+	}
+	rcmail.addEventListener('responseaftergetunread', rcmail_responseafter_getunread);
+
+	rcmail.addEventListener('menu-open', rcmail_menu_work.bind(null, 'open'));
+	rcmail.addEventListener('menu-close', rcmail_menu_work.bind(null, 'close'));
+	rcmail.addEventListener('selectfolder', rcmail_select_folder);
+	
+	if (rcmail.message_list) {
+		rcmail.message_list.addEventListener('select', rcmail_select_message);
+	}
 
 }
 
@@ -1193,14 +1207,14 @@ plugin_contextmenu_folder.prototype.html_list = function html_list(args, opts) {
 
 	var content = $('<div>').attr({
 		id : part_id('root'),
-		class : 'uibox',
+		'class' : 'uibox',
 		style : 'max-height: 10em; overflow-x: hidden; overflow-y: auto;',
 	});
 
 	var table = $('<table>').attr({
 		id : part_id('list'),
 		role : 'listbox',
-		class : 'records-table sortheader fixedheader', // TODO
+		'class' : 'records-table sortheader fixedheader', // TODO
 	});
 	content.append(table);
 
