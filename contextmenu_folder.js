@@ -1845,7 +1845,6 @@ plugin_contextmenu_folder.prototype.folder_scan_tree = function folder_scan_tree
 
 	var target_input = $('<textarea>').prop({
 		id : 'target',
-		type : 'text',
 		rows : 7,
 		cols : 55,
 		readonly : 'true',
