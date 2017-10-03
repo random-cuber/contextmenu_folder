@@ -329,6 +329,12 @@
       "css": "left-hand",
       "code": 59432,
       "src": "fontawesome"
+    },
+    {
+      "uid": "c64623255a4a7c72436b199b05296c4f",
+      "css": "emo-happy",
+      "code": 59433,
+      "src": "fontelico"
     }
   ]
 }

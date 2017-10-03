@@ -51,6 +51,7 @@
 .folder-icon-trash-can-iso { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe826;&nbsp;'); }
 .folder-icon-right-hand { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe827;&nbsp;'); }
 .folder-icon-left-hand { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe828;&nbsp;'); }
+.folder-icon-emo-happy { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xe829;&nbsp;'); }
 .folder-icon-heart-broken { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xf028;&nbsp;'); }
 .folder-icon-move { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xf047;&nbsp;'); }
 .folder-icon-folder-open { *zoom: expression( this.runtimeStyle['zoom'] = '1', this.innerHTML = '&#xf068;&nbsp;'); }

@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# download assets from http://fontello.com 
+# 1) run this script
+# 2) change font selections
+# 3) download and replace updated config.json
+# 4) run this script again
+# 5) verify all configured fonts are marked active  
+
 font_open() {
     echo "$FUNCNAME"
     curl \
