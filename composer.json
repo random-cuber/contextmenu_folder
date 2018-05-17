@@ -1,28 +1,41 @@
 {
-	"name": "random-cuber/contextmenu_folder",
-	"description": "Adds context menus with mailbox operations",
-	"keywords": ["context", "menu", "folder", "mailbox", "create", "delete", "rename", "locate", "filter", "view"],
-	"homepage": "https://github.com/random-cuber/contextmenu_folder",
-	"license": "Apache",
-	"type": "roundcube-plugin",
-	"version": "1.3.3",
-	"authors": [{
-		"name": "Andrei Pozolotin",
-		"email": "andrei.pozolotin@gmail.com",
-		"role": "Developer"
-	}],
-	"repositories": [{
-		"type": "composer",
-		"url": "http://plugins.roundcube.net"
-	}],
-	"require": {
-		"php": ">=5.4.0",
-		"roundcube/plugin-installer": ">=0.1.6",
-		"johndoh/contextmenu": ">=2.3"
+	"name" : "random-cuber/contextmenu_folder",
+	"description" : "Adds context menus with mailbox operations",
+	"keywords" : [
+		"context",
+		"menu",
+		"folder",
+		"mailbox",
+		"create",
+		"delete",
+		"rename",
+		"locate",
+		"filter",
+		"view"
+	],
+	"homepage" : "https://github.com/random-cuber/contextmenu_folder",
+	"license" : "Apache",
+	"type" : "roundcube-plugin",
+	"version" : "1.3.3",
+	"authors" : [{
+			"name" : "Andrei Pozolotin",
+			"email" : "andrei.pozolotin@gmail.com",
+			"role" : "Developer"
+		}
+	],
+	"repositories" : [{
+			"type" : "composer",
+			"url" : "https://plugins.roundcube.net/"
+		}
+	],
+	"require" : {
+		"php" : ">=5.4.0",
+		"roundcube/plugin-installer" : ">=0.1.6",
+		"johndoh/contextmenu" : ">=2.3"
 	},
-	"extra": {
-		"roundcube": {
-			"min-version": "1.3"
+	"extra" : {
+		"roundcube" : {
+			"min-version" : "1.3"
 		}
 	}
 }
