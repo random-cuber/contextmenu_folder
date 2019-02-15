@@ -911,6 +911,7 @@ function plugin_contextmenu_folder() {
 		'show_all', //
 		'show_active', //
 		'show_favorite', //
+		'toggle_show_mode', //
 
 		'reset_selected', //
 		'reset_transient', //
@@ -2021,6 +2022,19 @@ plugin_contextmenu_folder.prototype.show_active = function show_active() {
 plugin_contextmenu_folder.prototype.show_favorite = function show_favorite() {
 	var self = this;
 	self.show_mode('show_favorite');
+}
+
+// plugin command
+plugin_contextmenu_folder.prototype.toggle_show_mode = function toggle_show_mode() {
+	var self = this;
+	var show_mode = self.env('show_mode');
+	if (show_mode == 'show_all') { 
+		self.show_mode('show_favorite'); 
+	} else if (show_mode == 'show_favorite') { 
+		self.show_mode('show_active'); 
+	} else { 
+		self.show_mode('show_all'); 
+	}
 }
 
 // command provider
