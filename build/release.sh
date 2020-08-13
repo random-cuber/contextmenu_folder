@@ -14,7 +14,7 @@ version_get() {
 
 version_put() {
     local version="$1"
-    sed -i -r -e 's/(^.*"version":.*)([0-9]+[.][0-9]+[.][0-9]+)(.*$)/\1'${version}'\3/' "$composer"
+    sed -i -r -e 's/(^.*"version".*)([0-9]+[.][0-9]+[.][0-9]+)(.*$)/\1'${version}'\3/' "$composer"
 }
 
 version_split() {
