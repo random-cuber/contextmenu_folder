@@ -1,13 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-location=$(dirname $0) 
+location=$(dirname $0)
 
 basedir=$(cd "$location/.." && pwd)
 
 composer="$basedir/composer.json"
 
+version="0.0.0"
+
 version_get() {
-    cat "$composer" | grep '"version":' | sed -r -e 's/^.*([0-9]+[.][0-9]+[.][0-9]+).*$/\1/'
+    cat "$composer" | grep '"version"' | sed -r -e 's/^.*([0-9]+[.][0-9]+[.][0-9]+).*$/\1/'
 }
 
 version_put() {
@@ -18,9 +20,9 @@ version_put() {
 version_split() {
     local version="$1"
     local array=(${version//'.'/' '})
-    version_major=${array[0]}    
-    version_minor=${array[1]}    
-    version_micro=${array[2]}    
+    version_major=${array[0]}
+    version_minor=${array[1]}
+    version_micro=${array[2]}
 }
 
 version_build() {
@@ -33,9 +35,11 @@ version_increment() {
 
 version_update() {
     version=$(version_get)
+    echo "version past=$version"
     version_split "$version"
     version_increment
     version=$(version_build)
+    echo "version next=$version"
     version_put "$version"
 }
 
@@ -43,7 +47,7 @@ project_release() {
     cd "$basedir"
     echo "// commit $(pwd)"
     git add --all  :/
-    git status 
+    git status
     message=$(git status --short)
     git commit --message "$message"
     tag="$version"
