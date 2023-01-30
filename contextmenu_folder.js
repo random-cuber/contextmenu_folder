@@ -2211,7 +2211,6 @@ plugin_contextmenu_folder.prototype.mbox_list_control_menu = function mbox_list_
 	var menu_link = $('#mailboxmenulink');
 	if (!menu_link.length) {
 		self.log('missing menu_link', true);
-		return;
 	}
 
 	// plugin control button
@@ -2270,11 +2269,17 @@ plugin_contextmenu_folder.prototype.mbox_list_control_menu = function mbox_list_
 	};
 
 	// mimic default button
-	ctrl_link.attr('role', menu_link.attr('role'));
-	ctrl_link.attr('class', menu_link.attr('class'));
-
-	// place control after default
-	ctrl_link.insertAfter(menu_link);
+	if (menu_link.length) {
+		ctrl_link.attr('role', menu_link.attr('role'));
+		ctrl_link.attr('class', menu_link.attr('class'));
+		// place control after default
+		ctrl_link.insertAfter(menu_link);
+	} else {
+		var footer_div = $('#layout-sidebar > .footer.small')
+		ctrl_link.attr('role', 'button');
+		ctrl_link.attr('class', 'groupactions button');
+		ctrl_link.prependTo(footer_div);
+	}
 
 	if (self.has_feature('hide_menu_link')) {
 		menu_link.hide();
