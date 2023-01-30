@@ -1,20 +1,27 @@
 #!/usr/bin/env bash
 
-location=$(dirname $0)
+#
+# project release
+#
+# this script will:
+# * auto-increment version 
+# * commit new release tag
 
-basedir=$(cd "$location/.." && pwd)
+this_dir=$(dirname $0)
 
-composer="$basedir/composer.json"
+base_dir=$(cd "$this_dir/.." && pwd)
+
+composer_json="$base_dir/composer_json.json"
 
 version="0.0.0"
 
 version_get() {
-    cat "$composer" | grep '"version"' | sed -r -e 's/^.*([0-9]+[.][0-9]+[.][0-9]+).*$/\1/'
+    cat "$composer_json" | grep '"version"' | sed -r -e 's/^.*([0-9]+[.][0-9]+[.][0-9]+).*$/\1/'
 }
 
 version_put() {
     local version="$1"
-    sed -i -r -e 's/(^.*"version".*)([0-9]+[.][0-9]+[.][0-9]+)(.*$)/\1'${version}'\3/' "$composer"
+    sed -i -r -e 's/(^.*"version".*)([0-9]+[.][0-9]+[.][0-9]+)(.*$)/\1'${version}'\3/' "$composer_json"
 }
 
 version_split() {
@@ -44,7 +51,7 @@ version_update() {
 }
 
 project_release() {
-    cd "$basedir"
+    cd "$base_dir"
     echo "// commit $(pwd)"
     git add --all  :/
     git status

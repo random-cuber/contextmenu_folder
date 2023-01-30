@@ -2,6 +2,7 @@
 .project
 .settings
 .buildpath
+.externalToolBuilders
 
 vendor/
 composer.phar

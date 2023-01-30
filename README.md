@@ -126,7 +126,7 @@ Contribute to [translation via transifex][translation].
 
 [roundcube_arch]: https://wiki.archlinux.org/index.php/Roundcube
 [jqueryui_link]: https://github.com/roundcube/roundcubemail/tree/master/plugins/jqueryui
-[contextmenu_link]: http://plugins.roundcube.net/packages/johndoh/contextmenu
+[contextmenu_link]: https://plugins.roundcube.net/#/packages/johndoh/contextmenu
 [contextmenu_folder_link]: http://plugins.roundcube.net/packages/random-cuber/contextmenu_folder
 
 [folder_list_context_menu]:  https://raw.githubusercontent.com/random-cuber/contextmenu_folder/master/build/folder_list_context_menu.png
