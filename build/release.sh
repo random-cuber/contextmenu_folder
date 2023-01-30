@@ -11,7 +11,7 @@ this_dir=$(dirname $0)
 
 base_dir=$(cd "$this_dir/.." && pwd)
 
-composer_json="$base_dir/composer_json.json"
+composer_json="$base_dir/composer.json"
 
 version="0.0.0"
 
