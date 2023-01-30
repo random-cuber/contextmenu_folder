@@ -123,12 +123,16 @@ class contextmenu_folder extends rcube_plugin {
     // plugin server logger
     function log($line, $force = false) {
         if($this->config_get('enable_logging') || $force){
-        	$head = $this->key('');
-        	$file = $this->key('log');
-        	$func = debug_backtrace()[1]['function'];
+                $head = $this->key('');
+                $file = $this->key('log');
+                $func = debug_backtrace()[1]['function'];
             $text = $head . $func . ' : ' . $line;
             rcube::write_log($file, $text);
         }
+    }
+    // convert text to UTF7-IMAP
+    static function utf7convert($mbox) {
+        return mb_convert_encoding($mbox, 'UTF7-IMAP');
     }
 
     // localized quoted text
@@ -158,10 +162,10 @@ class contextmenu_folder extends rcube_plugin {
     function hierarchy_delimiter() {
         return $this->rc->storage->get_hierarchy_delimiter();
     }
-    
+
     // verify if file is present at path
     function has_file($path) {
-    	 return $path && is_file($path) && is_readable($path);
+         return $path && is_file($path) && is_readable($path);
     }
 
     // load plugin default configuration file(s)
@@ -169,15 +173,15 @@ class contextmenu_folder extends rcube_plugin {
         $config = null;
         $path = $this->home . '/' . 'config.inc.php.dist';
         if ($this->has_file($path)) {
-        	ob_start();
-        	include($path);
-        	ob_end_clean();
+                ob_start();
+                include($path);
+                ob_end_clean();
         }
         $path = $this->home . '/' . 'config.inc.php';
         if ($this->has_file($path)) {
-        	ob_start();
-        	include($path);
-        	ob_end_clean();
+                ob_start();
+                include($path);
+                ob_end_clean();
         }
         if (is_array($config)) {
             $this->config_default = $config;
@@ -403,6 +407,8 @@ class contextmenu_folder extends rcube_plugin {
 
         $source = '';
         $target = $this->input_value('target');
+        // fix of UTF-8 and mUTF-7 imap folder name
+        $target = $this->utf7convert($target);
         $result = $this->folder_ensure_tree($target);
         if ($result) {
             $this->folder_update('create', $source, $target);
@@ -455,6 +461,8 @@ class contextmenu_folder extends rcube_plugin {
 
         $source = $this->input_value('source');
         $target = $this->input_value('target');
+        //fix of UTF-8 and mUTF-7 imap folder name
+        $target = $this->utf7convert($target);
         $result = $storage->rename_folder($source, $target);
         if ($result) {
             $this->folder_update('rename', $source, $target);
